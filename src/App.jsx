@@ -1,20 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Textarea } from '@/components/ui/textarea.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, DollarSign, CheckCircle, Users, Award, Zap } from 'lucide-react'
+import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight } from 'lucide-react'
 import './App.css'
 
 // Import images
-import sprayFoamImage from './assets/spray-foam-installation.jpg'
 import sprayFoamHeroImage from './assets/spray-foam-installation-hero.jpg'
-import atticInsulationImage from './assets/attic-insulation.jpg'
 import professionalTeamImage from './assets/professional-team.jpg'
-import blownInsulationImage from './assets/blown-insulation.jpg'
-import insulationTypesImage from './assets/insulation-types.png'
-import insulationTypesNewImage from './assets/insulation-types-new.png'
 import blownInsulationNewImage from './assets/blown-insulation-new.jpg'
 import atticInsulationNewImage from './assets/attic-insulation-new.jpg'
 import professionalTeamSprayImage from './assets/professional-team-spray.jpg'
@@ -29,83 +24,150 @@ function App() {
     message: ''
   })
 
-  const [thermalNav, setThermalNav] = useState({
-    temperature: 75,
-    activeSection: 'hero',
-    smartTip: 'Most users check Services first'
-  })
 
   const [headerState, setHeaderState] = useState({
     currentTemp: 89,
     realFeelsLike: 97,
     energySavings: 0,
     isExtremeHeat: false,
-    timeOfDay: 'afternoon'
+    timeOfDay: 'afternoon',
+    todaysHigh: 89,
+    isNight: false
   })
+
+  // Mobile-specific state
+  const [isMobile, setIsMobile] = useState(false)
+  const [activeTab, setActiveTab] = useState('home')
+  const [showLeadWidget, setShowLeadWidget] = useState(false)
+  const [currentSwipeCard, setCurrentSwipeCard] = useState(0)
+  const [formStep, setFormStep] = useState(1)
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+  const swipeRef = useRef(null)
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY
       const windowHeight = window.innerHeight
       const documentHeight = document.documentElement.scrollHeight
-      
-      // Dynamic temperature based on scroll position
-      const scrollPercent = scrollY / (documentHeight - windowHeight)
-      const temperature = Math.round(75 + (scrollPercent * 25)) // 75°F to 100°F
-      
-      // Smart tips based on scroll position
-      let smartTip = 'Most users check Services first'
-      let activeSection = 'hero'
-      
-      if (scrollY > windowHeight * 0.3) {
-        smartTip = '🔥 Hot sections ahead!'
-        activeSection = 'services'
+
+      // Mobile-specific scroll behaviors
+      if (isMobile) {
+        // Auto-update active tab based on scroll
+        if (scrollY < windowHeight * 0.5) {
+          setActiveTab('home')
+        } else if (scrollY < windowHeight * 1.5) {
+          setActiveTab('services')
+        } else if (scrollY < windowHeight * 2.5) {
+          setActiveTab('about')
+        } else {
+          setActiveTab('quote')
+        }
       }
-      if (scrollY > windowHeight * 1.2) {
-        smartTip = '📊 Compare our solutions'
-        activeSection = 'about'
-      }
-      if (scrollY > windowHeight * 2) {
-        smartTip = '🌟 Ready for a quote?'
-        activeSection = 'quote'
-      }
-      
-      setThermalNav({ temperature, activeSection, smartTip })
     }
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [isMobile])
 
   useEffect(() => {
-    // Simulate real-time header updates
-    const updateHeader = () => {
-      const hour = new Date().getHours()
-      const baseTemp = 85 + Math.random() * 15 // 85-100°F simulation
-      const currentTemp = Math.round(baseTemp + (hour > 12 && hour < 18 ? 5 : 0))
-      const realFeelsLike = Math.round(currentTemp + 8)
-      const isExtremeHeat = currentTemp > 95
-      
-      // Calculate energy savings based on temperature
-      const energySavings = Math.round((currentTemp - 72) * 12.5) // $12.50 per degree over 72°F
-      
-      let timeOfDay = 'morning'
-      if (hour >= 12 && hour < 17) timeOfDay = 'afternoon'
-      else if (hour >= 17) timeOfDay = 'evening'
-      
-      setHeaderState({
-        currentTemp,
-        realFeelsLike,
-        energySavings: Math.max(energySavings, 0),
-        isExtremeHeat,
-        timeOfDay
-      })
+    // Fetch real weather data for McAllen, TX (RGV area)
+    const fetchWeatherData = async () => {
+      try {
+        // Using OpenWeatherMap API with environment variables
+        const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
+        const CITY = import.meta.env.VITE_WEATHER_CITY || 'McAllen,TX,US'
+        
+        if (!API_KEY) {
+          throw new Error('Weather API key not found. Please check your .env file.')
+        }
+        
+        // Fetch real weather data
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=imperial`
+        )
+        const data = await response.json()
+        const currentTemp = Math.round(data.main.temp)
+        const realFeelsLike = Math.round(data.main.feels_like)
+        const todaysHigh = Math.round(data.main.temp_max)
+        
+        // Determine if it's night (after 8 PM or before 6 AM)
+        const hour = new Date().getHours()
+        const isNight = hour >= 20 || hour < 6
+        
+        // Use today's high temp at night, current temp during day
+        const displayTemp = isNight ? todaysHigh : currentTemp
+        const displayFeelsLike = isNight ? todaysHigh + 8 : realFeelsLike
+        
+        const isExtremeHeat = displayTemp > 95
+        
+        // Calculate realistic energy savings based on temperature
+        // Average AC cost in RGV: ~$200-400/month in summer
+        // Poor insulation can increase by 40%
+        const baseMonthlyACCost = displayTemp > 85 ? 250 : 150
+        const poorInsulationMultiplier = 1.4
+        const wellInsulatedCost = baseMonthlyACCost
+        const poorlyInsulatedCost = baseMonthlyACCost * poorInsulationMultiplier
+        const energySavings = Math.round(poorlyInsulatedCost - wellInsulatedCost)
+        
+        let timeOfDay = 'morning'
+        if (hour >= 12 && hour < 17) timeOfDay = 'afternoon'
+        else if (hour >= 17 && hour < 20) timeOfDay = 'evening'
+        else if (hour >= 20 || hour < 6) timeOfDay = 'night'
+        
+        setHeaderState({
+          currentTemp: displayTemp,
+          realFeelsLike: displayFeelsLike,
+          energySavings: Math.max(energySavings, 0),
+          isExtremeHeat,
+          timeOfDay,
+          todaysHigh,
+          isNight
+        })
+      } catch (error) {
+        console.error('Weather fetch error:', error)
+        // Fallback to default values
+        const hour = new Date().getHours()
+        const isNight = hour >= 20 || hour < 6
+        setHeaderState({
+          currentTemp: 93,
+          realFeelsLike: 101,
+          energySavings: 263,
+          isExtremeHeat: false,
+          timeOfDay: isNight ? 'night' : 'afternoon',
+          todaysHigh: 93,
+          isNight
+        })
+      }
     }
 
-    updateHeader()
-    const interval = setInterval(updateHeader, 10000) // Update every 10 seconds
+    fetchWeatherData()
+    const updateInterval = parseInt(import.meta.env.VITE_WEATHER_UPDATE_INTERVAL) || 300000
+    const interval = setInterval(fetchWeatherData, updateInterval)
     return () => clearInterval(interval)
   }, [])
+
+  // Mobile lead widget timer - DISABLED
+  useEffect(() => {
+    if (isMobile) {
+      // Popup disabled
+      // const timer = setTimeout(() => {
+      //   setShowLeadWidget(true)
+      // }, 15000) // Show after 15 seconds on mobile
+      
+      // return () => clearTimeout(timer)
+    }
+  }, [isMobile])
 
   const handleInputChange = (e) => {
     setFormData({
@@ -128,22 +190,109 @@ function App() {
     })
   }
 
+  // Mobile-specific handlers
+  const handleTabClick = (tab) => {
+    setActiveTab(tab)
+    const element = document.getElementById(tab === 'home' ? 'hero' : tab)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  const handleSwipe = (direction) => {
+    const totalCards = 3
+    if (direction === 'left' && currentSwipeCard < totalCards - 1) {
+      setCurrentSwipeCard(currentSwipeCard + 1)
+    } else if (direction === 'right' && currentSwipeCard > 0) {
+      setCurrentSwipeCard(currentSwipeCard - 1)
+    }
+  }
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+    if (isLeftSwipe) handleSwipe('left')
+    if (isRightSwipe) handleSwipe('right')
+  }
+
+  const handleMobileFormStep = (step) => {
+    setFormStep(step)
+  }
+
+  const MobileLeadWidget = () => (
+    <>
+      {showLeadWidget && (
+        <>
+          <div className="mobile-overlay show" onClick={() => setShowLeadWidget(false)} />
+          <div className="mobile-lead-widget show">
+            <button 
+              className="mobile-lead-widget-close"
+              onClick={() => setShowLeadWidget(false)}
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-bold mb-2">🎉 Special Offer!</h3>
+              <p className="text-sm text-gray-600">Get 20% off your first service</p>
+            </div>
+            <Input
+              type="tel"
+              placeholder="Enter your phone number"
+              className="mb-3"
+            />
+            <Button 
+              className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white"
+              onClick={() => {
+                setShowLeadWidget(false)
+                alert('Thank you! We\'ll text you the discount code.')
+              }}
+            >
+              Get My Discount
+            </Button>
+          </div>
+        </>
+      )}
+    </>
+  )
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header with Integrated Navigation */}
-      <header className="bg-white fixed top-0 left-0 right-0 z-50 shadow-sm">
+      <header className="bg-white fixed top-0 left-0 right-0 z-50 shadow-lg">
         {/* Main Header */}
         <div className="container mx-auto px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             
             {/* Brand */}
             <div className="flex items-center gap-3">
-              <div className="bg-orange-500 p-2 rounded-lg">
+              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-lg shadow-md">
                 <Shield className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">RGV Insulation Experts</h1>
-                <p className="text-sm text-gray-600">Licensed & Insured • 500+ Happy Customers</p>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span>Licensed & Insured</span>
+                  <span className="text-xs">•</span>
+                  <div className="flex items-center gap-1">
+                    <div className="flex text-yellow-500">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-3 w-3 fill-current" />
+                      ))}
+                    </div>
+                    <span className="font-semibold">4.9</span>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -196,16 +345,26 @@ function App() {
                   Service Areas
                 </a>
               </div>
-              <a 
-                href="#quote" 
-                onClick={(e) => {
-                  e.preventDefault()
-                  document.getElementById('quote')?.scrollIntoView({ behavior: 'smooth' })
-                }}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-bold text-sm transition-all hover:scale-105 shadow-lg cursor-pointer"
-              >
-                Get Free Quote →
-              </a>
+              <div className="flex items-center gap-4">
+                {!isMobile && (
+                  <div className="hidden lg:flex items-center gap-2 text-sm text-gray-600">
+                    <Thermometer className="h-4 w-4" />
+                    <span className="font-semibold">{headerState.currentTemp}°F</span>
+                    <span className="text-xs">•</span>
+                    <span className="text-xs">{headerState.isNight ? "Today's High" : "Current Temp"}</span>
+                  </div>
+                )}
+                <a 
+                  href="#quote" 
+                  onClick={(e) => {
+                    e.preventDefault()
+                    document.getElementById('quote')?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-2 rounded-full font-bold text-sm transition-all hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                >
+                  Get Free Quote →
+                </a>
+              </div>
             </nav>
           </div>
         </div>
@@ -215,9 +374,13 @@ function App() {
       <div className="h-[120px]"></div>
 
       {/* Hero Section */}
-      <section className="hero-modern grain-overlay relative flex items-center">
-        <div className="geometric-shape w-96 h-96 -top-20 -right-20" />
-        <div className="geometric-shape w-64 h-64 bottom-20 left-10" />
+      <section id="hero" className="hero-modern grain-overlay relative flex items-center">
+        {!isMobile && (
+          <>
+            <div className="geometric-shape w-96 h-96 -top-20 -right-20" />
+            <div className="geometric-shape w-64 h-64 bottom-20 left-10" />
+          </>
+        )}
         
         {/* Blueprint House Background */}
         <div className="blueprint-house">
@@ -248,7 +411,7 @@ function App() {
               <rect x="270" y="310" width="60" height="90" />
               
               {/* Attic insulation */}
-              <path d="M 110 195 L 300 60 L 490 195" strokeDasharray="5,5" stroke="#10B981" strokeWidth="3" opacity="0.8" />
+              <path d="M 120 195 L 300 60 L 482 195" strokeDasharray="5,5" stroke="#10B981" strokeWidth="3" opacity="0.8" />
             </g>
             
             {/* Heat arrows outside */}
@@ -385,41 +548,117 @@ function App() {
         
         <div className="container mx-auto px-4 lg:px-8 py-11 lg:py-15 relative z-10 w-full">
           <div className="grid lg:grid-cols-2 gap-10 items-center h-full">
-            <div className="space-y-6 fade-up max-w-4xl">
-              <Badge className="badge-accent inline-flex items-center gap-2">
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                Proudly Serving the RGV
-              </Badge>
-              <h2 className="text-5xl lg:text-[3.5rem] xl:text-[4.2rem] font-black text-gray-900 leading-[0.95]">
-                Beat the South Texas Heat with
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500"> Professional Insulation</span>
-              </h2>
-              <p className="text-lg lg:text-[1.4rem] text-gray-600 leading-relaxed max-w-3xl">
-                From McAllen to Brownsville, we help Valley families stay cool and save money with expert insulation services. 
-                Combat those 100°F summers and high energy bills!
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button size="lg" className="btn-primary px-8 py-4 text-base font-semibold shadow-xl flex items-center justify-center">
-                  <Phone className="mr-2 h-4 w-4" />
-                  Call or Text (956) 555-FOAM
-                </Button>
-                <Button size="lg" className="btn-outline px-7 py-4 text-lg font-bold">
-                  Learn More →
-                </Button>
-              </div>
-              <div className="flex items-center gap-6 pt-4">
-                <div className="neumorphic-inset flex items-center gap-3 px-6 py-3">
-                  <div className="flex text-yellow-500">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-current" />
-                    ))}
+            <div className="space-y-6 fade-up mobile-animate max-w-4xl">
+              {isMobile ? (
+                <>
+                  {/* Mobile-specific hero content */}
+                  <div className="mobile-glass-card mb-4 p-3 inline-flex items-center gap-2">
+                    <div className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs font-semibold">RGV's #1 Insulation Service</span>
                   </div>
-                  <span className="font-bold text-gray-900">4.9/5 Rating</span>
-                </div>
-                <div className="text-gray-600">
-                  <span className="text-3xl font-black text-gray-900">500+</span> Happy Families
-                </div>
-              </div>
+                  <h2 className="text-2xl font-black text-gray-900 leading-tight">
+                    Stop Wasting Money on
+                    <span className="mobile-gradient-text"> High AC Bills</span>
+                  </h2>
+                  <div className="mobile-glass-card">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-xs text-gray-600">{headerState.isNight ? "Today's Temperature" : "Current Temperature"}</p>
+                        <p className="text-2xl font-black text-orange-600">{headerState.currentTemp}°F</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-600">You're losing</p>
+                        <p className="text-2xl font-black text-red-600">${headerState.energySavings}/mo</p>
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3">
+                      <p className="text-xs font-semibold text-gray-700">💡 Smart Tip</p>
+                      <p className="text-xs text-gray-600 mt-1">Proper insulation can cut cooling costs by 40% in the Valley heat</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Button 
+                      size="lg" 
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white mobile-interactive"
+                      onClick={() => setShowLeadWidget(true)}
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Get Instant Quote
+                    </Button>
+                    <a 
+                      href="tel:9565555555" 
+                      className="btn-primary w-full mobile-ripple text-center block"
+                    >
+                      <Phone className="inline mr-2 h-4 w-4" />
+                      Call (956) 555-FOAM
+                    </a>
+                  </div>
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex -space-x-2">
+                        {[...Array(4)].map((_, i) => (
+                          <div 
+                            key={i} 
+                            className="w-8 h-8 rounded-full border-2 border-white overflow-hidden"
+                            style={{
+                              background: `linear-gradient(135deg, ${
+                                ['#FF6B35', '#10B981', '#3B82F6', '#8B5CF6'][i]
+                              } 0%, ${
+                                ['#FF5722', '#059669', '#2563EB', '#7C3AED'][i]
+                              } 100%)`
+                            }}
+                          >
+                            <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">
+                              {['JM', 'RS', 'AL', 'MG'][i]}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        <span className="font-bold">47 neighbors</span> saved this month
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Desktop hero content */}
+                  <Badge className="badge-accent inline-flex items-center gap-2">
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                    Proudly Serving the RGV
+                  </Badge>
+                  <h2 className="text-5xl lg:text-[3.5rem] xl:text-[4.2rem] font-black text-gray-900 leading-[0.95]">
+                    Beat the South Texas Heat with
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500"> Professional Insulation</span>
+                  </h2>
+                  <p className="text-lg lg:text-[1.4rem] text-gray-600 leading-relaxed max-w-3xl">
+                    From McAllen to Brownsville, we help Valley families stay cool and save money with expert insulation services. 
+                    Combat those 100°F summers and high energy bills!
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <Button size="lg" className="btn-primary mobile-ripple px-8 py-4 text-base font-semibold shadow-xl flex items-center justify-center">
+                      <Phone className="mr-2 h-4 w-4" />
+                      Call or Text (956) 555-FOAM
+                    </Button>
+                    <Button size="lg" className="btn-outline mobile-touch px-7 py-4 text-lg font-bold">
+                      Learn More →
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-6 pt-4">
+                    <div className="neumorphic-inset flex items-center gap-3 px-6 py-3">
+                      <div className="flex text-yellow-500">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-5 w-5 fill-current" />
+                        ))}
+                      </div>
+                      <span className="font-bold text-gray-900">4.9/5 Rating</span>
+                    </div>
+                    <div className="text-gray-600">
+                      <span className="text-3xl font-black text-gray-900 mobile-counter">500+</span> Happy Families
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             <div className="relative lg:block hidden flex-1">
               <div className="modern-image relative w-full max-w-[570px] h-[475px] ml-auto">
@@ -453,18 +692,142 @@ function App() {
       <section id="services" className="section-modern bg-gradient-to-b from-white to-gray-50 w-full">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-12 fade-up">
-            <h3 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
-              Complete Insulation Services for the
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500"> Valley</span>
-            </h3>
-            <p className="text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Whether you're in Harlingen, Edinburg, or anywhere in between, we provide comprehensive insulation solutions 
-              designed for South Texas climate challenges.
-            </p>
+            {isMobile ? (
+              <>
+                <h3 className="text-2xl font-black text-gray-900 mb-4">
+                  Our Services
+                </h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  Swipe to explore our insulation solutions
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+                  Complete Insulation Services for the
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500"> Valley</span>
+                </h3>
+                <p className="text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                  Whether you're in Harlingen, Edinburg, or anywhere in between, we provide comprehensive insulation solutions 
+                  designed for South Texas climate challenges.
+                </p>
+              </>
+            )}
           </div>
 
-          <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-8">
-            <Card className="modern-card group">
+          {isMobile ? (
+            <>
+              {/* Mobile Swipeable Cards */}
+              <div 
+                className="mobile-swipe-container"
+                ref={swipeRef}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+              >
+                <div 
+                  className="mobile-swipe-track"
+                  style={{ transform: `translateX(-${currentSwipeCard * 296}px)` }}
+                >
+                  {/* Mobile Service Card 1 */}
+                  <div className="mobile-swipe-card mobile-snap-item">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="bg-gradient-to-br from-orange-500 to-red-500 p-3 rounded-2xl">
+                        <Zap className="h-6 w-6 text-white" />
+                      </div>
+                      <Badge className="bg-green-100 text-green-800 text-xs">Popular</Badge>
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">Spray Foam Insulation</h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Best for extreme RGV heat. Creates air-tight seal, blocks humidity.
+                    </p>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-xs text-gray-700">40% energy savings</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-xs text-gray-700">Lifetime warranty</span>
+                      </div>
+                    </div>
+                    <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm">
+                      Get Quote <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Mobile Service Card 2 */}
+                  <div className="mobile-swipe-card mobile-snap-item">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-2xl">
+                        <Shield className="h-6 w-6 text-white" />
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800 text-xs">Best Value</Badge>
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">Blown-In Insulation</h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Cost-effective attic solution. Quick installation, great results.
+                    </p>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-xs text-gray-700">Same-day install</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-xs text-gray-700">Eco-friendly</span>
+                      </div>
+                    </div>
+                    <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm">
+                      Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Mobile Service Card 3 */}
+                  <div className="mobile-swipe-card mobile-snap-item">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-2xl">
+                        <Thermometer className="h-6 w-6 text-white" />
+                      </div>
+                      <Badge className="bg-orange-100 text-orange-800 text-xs">Complete</Badge>
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">Attic Solutions</h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Full attic upgrade with radiant barriers and ventilation.
+                    </p>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-xs text-gray-700">Energy audit included</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-xs text-gray-700">Heat reduction</span>
+                      </div>
+                    </div>
+                    <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white text-sm">
+                      Schedule Audit <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Swipe Indicators */}
+              <div className="mobile-swipe-indicators">
+                {[0, 1, 2].map((index) => (
+                  <div 
+                    key={index}
+                    className={`mobile-swipe-dot ${currentSwipeCard === index ? 'active' : ''}`}
+                    onClick={() => setCurrentSwipeCard(index)}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Desktop Grid Layout */}
+              <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-8">
+                <Card className="modern-card mobile-card-stack group">
               <div className="overflow-hidden rounded-t-[24px]">
                 <img 
                   src={professionalTeamSprayImage} 
@@ -510,7 +873,7 @@ function App() {
               </CardContent>
             </Card>
 
-            <Card className="modern-card group">
+            <Card className="modern-card mobile-card-stack group">
               <div className="overflow-hidden rounded-t-[24px]">
                 <img 
                   src={blownInsulationNewImage} 
@@ -555,7 +918,7 @@ function App() {
               </CardContent>
             </Card>
 
-            <Card className="modern-card group">
+            <Card className="modern-card mobile-card-stack group">
               <div className="overflow-hidden rounded-t-[24px]">
                 <img 
                   src={atticInsulationNewImage} 
@@ -599,9 +962,124 @@ function App() {
                 </ul>
               </CardContent>
             </Card>
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
+
+      {/* Mobile Work Showcase */}
+      {isMobile && (
+        <section className="py-8 bg-gradient-to-b from-gray-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-black text-gray-900 mb-2">Our Work</h3>
+              <p className="text-sm text-gray-600">See the difference we make</p>
+            </div>
+            
+            {/* Ultra-thin work gallery */}
+            <div className="space-y-3">
+              {/* Work Card 1 */}
+              <div className="mobile-glass-card p-0 overflow-hidden">
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-24 flex-shrink-0">
+                    <img 
+                      src={professionalTeamSprayImage} 
+                      alt="Spray foam installation"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-bold text-sm">Spray Foam Installation</h4>
+                      <Badge className="bg-green-100 text-green-700 text-xs px-2 py-0.5">Today</Badge>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">Complete attic insulation - McAllen home</p>
+                    <div className="flex items-center gap-4 text-xs">
+                      <span className="text-green-600 font-semibold">-40% cooling costs</span>
+                      <span className="text-gray-500">2,400 sq ft</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Work Card 2 */}
+              <div className="mobile-glass-card p-0 overflow-hidden">
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-24 flex-shrink-0">
+                    <img 
+                      src={blownInsulationNewImage} 
+                      alt="Blown-in insulation"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-bold text-sm">Blown-In Insulation</h4>
+                      <Badge className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5">Yesterday</Badge>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">Attic upgrade - Edinburg residence</p>
+                    <div className="flex items-center gap-4 text-xs">
+                      <span className="text-green-600 font-semibold">R-38 rating</span>
+                      <span className="text-gray-500">Same day install</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Work Card 3 */}
+              <div className="mobile-glass-card p-0 overflow-hidden">
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-24 flex-shrink-0">
+                    <img 
+                      src={atticInsulationNewImage} 
+                      alt="Attic insulation"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-bold text-sm">Complete Attic Solution</h4>
+                      <Badge className="bg-orange-100 text-orange-700 text-xs px-2 py-0.5">This week</Badge>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">Full attic renovation - Harlingen home</p>
+                    <div className="flex items-center gap-4 text-xs">
+                      <span className="text-green-600 font-semibold">Energy Star certified</span>
+                      <span className="text-gray-500">3,100 sq ft</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats bar */}
+            <div className="mt-6 grid grid-cols-3 gap-2">
+              <div className="mobile-glass-card text-center py-3">
+                <p className="text-xl font-black text-gray-900">127</p>
+                <p className="text-xs text-gray-600">Homes This Month</p>
+              </div>
+              <div className="mobile-glass-card text-center py-3">
+                <p className="text-xl font-black text-green-600">$187</p>
+                <p className="text-xs text-gray-600">Avg Monthly Savings</p>
+              </div>
+              <div className="mobile-glass-card text-center py-3">
+                <p className="text-xl font-black text-orange-600">4.9★</p>
+                <p className="text-xs text-gray-600">Customer Rating</p>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="mt-6 text-center">
+              <Button 
+                className="bg-gradient-to-r from-gray-900 to-gray-800 text-white px-6 py-2 text-sm mobile-interactive"
+                onClick={() => handleTabClick('quote')}
+              >
+                Schedule Your Free Inspection →
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Why Choose Us Section */}
       <section id="about" className="py-16">
@@ -627,13 +1105,13 @@ function App() {
 
                 <div className="flex items-start space-x-4">
                   <div className="bg-green-100 p-2.5 rounded-lg flex-shrink-0">
-                    <DollarSign className="h-5 w-5 text-green-600" />
+                    <Users className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold mb-1">Financing Available</h4>
+                    <h4 className="text-lg font-semibold mb-1">Family Owned & Operated</h4>
                     <p className="text-sm text-gray-600">
-                      $0 down, 0% interest financing options. Plus, many of our services qualify for 
-                      federal tax credits and utility rebates.
+                      Third-generation Valley business treating every home like our own. 
+                      We're your neighbors, not a corporate chain.
                     </p>
                   </div>
                 </div>
@@ -740,7 +1218,132 @@ function App() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-8 bg-white">
-                <form onSubmit={handleSubmit} className="space-y-5">
+                {isMobile ? (
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Mobile Progressive Form */}
+                    <div className="mobile-form-progress">
+                      <div className={`mobile-form-progress-item ${formStep >= 1 ? 'active' : ''}`} />
+                      <div className={`mobile-form-progress-item ${formStep >= 2 ? 'active' : ''}`} />
+                      <div className={`mobile-form-progress-item ${formStep >= 3 ? 'active' : ''}`} />
+                    </div>
+                    
+                    {formStep === 1 && (
+                      <div className="mobile-form-step">
+                        <h4 className="text-lg font-bold mb-4">Step 1: Your Information</h4>
+                        <div className="space-y-4">
+                          <Input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            placeholder="Full Name"
+                            required
+                            className="w-full"
+                          />
+                          <Input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            placeholder="Phone Number"
+                            required
+                            className="w-full"
+                          />
+                          <Button 
+                            type="button"
+                            className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white"
+                            onClick={() => handleMobileFormStep(2)}
+                          >
+                            Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {formStep === 2 && (
+                      <div className="mobile-form-step">
+                        <h4 className="text-lg font-bold mb-4">Step 2: Service Details</h4>
+                        <div className="space-y-4">
+                          <select
+                            name="serviceType"
+                            value={formData.serviceType}
+                            onChange={handleInputChange}
+                            className="w-full p-3 border border-gray-300 rounded-lg"
+                          >
+                            <option value="">Select Service</option>
+                            <option value="spray-foam">Spray Foam</option>
+                            <option value="blown-in">Blown-In</option>
+                            <option value="attic">Attic Insulation</option>
+                          </select>
+                          <Input
+                            type="text"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleInputChange}
+                            placeholder="Property Address"
+                            className="w-full"
+                          />
+                          <div className="flex gap-3">
+                            <Button 
+                              type="button"
+                              variant="outline"
+                              className="flex-1"
+                              onClick={() => handleMobileFormStep(1)}
+                            >
+                              Back
+                            </Button>
+                            <Button 
+                              type="button"
+                              className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white"
+                              onClick={() => handleMobileFormStep(3)}
+                            >
+                              Next
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {formStep === 3 && (
+                      <div className="mobile-form-step">
+                        <h4 className="text-lg font-bold mb-4">Step 3: Additional Info</h4>
+                        <div className="space-y-4">
+                          <Textarea
+                            name="message"
+                            value={formData.message}
+                            onChange={handleInputChange}
+                            placeholder="Tell us about your project"
+                            rows={3}
+                            className="w-full"
+                          />
+                          <div className="mobile-success-check">
+                            <svg viewBox="0 0 52 52">
+                              <circle cx="26" cy="26" r="25" fill="none" />
+                              <path d="M14 27l7 7 16-16" fill="none" />
+                            </svg>
+                          </div>
+                          <div className="flex gap-3">
+                            <Button 
+                              type="button"
+                              variant="outline"
+                              className="flex-1"
+                              onClick={() => handleMobileFormStep(2)}
+                            >
+                              Back
+                            </Button>
+                            <Button 
+                              type="submit"
+                              className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white"
+                            >
+                              Get Quote
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </form>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -847,12 +1450,65 @@ function App() {
                       Message and data rates may apply. You can opt out at any time.
                     </p>
                   </div>
-                </form>
+                  </form>
+                )}
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
+
+      {/* Mobile-Only Components */}
+      {isMobile && (
+        <>
+          {/* Mobile Bottom Navigation */}
+          <div className="mobile-tab-bar">
+            <div 
+              className={`mobile-tab-item ${activeTab === 'home' ? 'active' : ''}`}
+              onClick={() => handleTabClick('home')}
+            >
+              <Home />
+              <span>Home</span>
+            </div>
+            <div 
+              className={`mobile-tab-item ${activeTab === 'services' ? 'active' : ''}`}
+              onClick={() => handleTabClick('services')}
+            >
+              <Sparkles />
+              <span>Services</span>
+            </div>
+            <div 
+              className={`mobile-tab-item ${activeTab === 'about' ? 'active' : ''}`}
+              onClick={() => handleTabClick('about')}
+            >
+              <FileText />
+              <span>About</span>
+            </div>
+            <div 
+              className={`mobile-tab-item ${activeTab === 'quote' ? 'active' : ''}`}
+              onClick={() => handleTabClick('quote')}
+            >
+              <MessageCircle />
+              <span>Quote</span>
+            </div>
+          </div>
+
+          {/* Mobile FAB Container - REMOVED */}
+          {/* Mobile Smart CTA - REMOVED */}
+
+          {/* Mobile Lead Widget */}
+          <MobileLeadWidget />
+
+          {/* Mobile Floating Phone Button */}
+          <a 
+            href="tel:9565555555" 
+            className="mobile-float-phone lg:hidden mobile-touch"
+            aria-label="Call us now"
+          >
+            <Phone />
+          </a>
+        </>
+      )}
 
       {/* Footer */}
       <footer id="contact" className="bg-gray-900 text-white py-10">
@@ -929,7 +1585,7 @@ function App() {
 
           <div className="border-t border-gray-800 mt-6 pt-6 text-center text-xs text-gray-400">
             <p>&copy; 2024 RGV Insulation Experts. All rights reserved. Licensed & Insured in Texas.</p>
-            <p className="mt-1">Financing available • Free estimates • Lifetime warranty</p>
+            <p className="mt-1">Emergency service • Free estimates • Lifetime warranty</p>
           </div>
         </div>
       </footer>
