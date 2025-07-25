@@ -252,7 +252,7 @@ function App() {
       console.error('Form submission error:', error)
       setSubmitStatus({
         type: 'error',
-        message: 'Something went wrong. Please call us at (956) 854-FOAM'
+        message: 'Something went wrong. Please call us at (956) 854-0899'
       })
     } finally {
       setIsSubmitting(false)
@@ -391,10 +391,10 @@ function App() {
             <div className="text-right">
               <div className="text-sm text-gray-600 mb-1">Call for FREE Quote</div>
               <a 
-                href="tel:+19568543626" 
+                href="tel:+19568540899" 
                 className="text-3xl lg:text-4xl font-black text-orange-600 hover:text-orange-700 block"
               >
-                (956) 854-FOAM
+                (956) 854-0899
               </a>
             </div>
           </div>
@@ -677,11 +677,11 @@ function App() {
                       Get Instant Quote
                     </Button>
                     <a 
-                      href="tel:+19568543626" 
+                      href="tel:+19568540899" 
                       className="btn-primary w-full mobile-ripple text-center block"
                     >
                       <Phone className="inline mr-2 h-4 w-4" />
-                      Call (956) 854-FOAM
+                      Call (956) 854-0899
                     </a>
                   </div>
                   <div className="flex items-center justify-between pt-2">
@@ -729,7 +729,7 @@ function App() {
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     <Button size="lg" className="btn-primary mobile-ripple px-8 py-4 text-base font-semibold shadow-xl flex items-center justify-center">
                       <Phone className="mr-2 h-4 w-4" />
-                      Call or Text (956) 854-FOAM
+                      Call or Text (956) 854-0899
                     </Button>
                     <Button size="lg" className="btn-outline mobile-touch px-7 py-4 text-lg font-bold">
                       Learn More →
@@ -1495,7 +1495,7 @@ function App() {
                             name="phone"
                             value={formData.phone}
                             onChange={handleInputChange}
-                            placeholder="(956) 854-3626"
+                            placeholder="(956) 854-0899"
                             className={`w-full ${formErrors.phone ? 'border-red-500' : ''}`}
                             disabled={isSubmitting}
                           />
@@ -1711,7 +1711,7 @@ function App() {
               <div className="space-y-2 text-sm text-gray-400">
                 <div className="flex items-center space-x-2">
                   <Phone className="h-4 w-4" />
-                  <span>(956) 854-FOAM</span>
+                  <span>(956) 854-0899</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
