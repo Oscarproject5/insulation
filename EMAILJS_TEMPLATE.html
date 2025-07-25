@@ -1,0 +1,183 @@
+<!-- 
+EmailJS Template Example
+Copy this HTML to your EmailJS template editor
+Available variables: {{to_name}}, {{from_name}}, {{from_phone}}, {{from_email}}, {{service_type}}, {{property_address}}, {{message}}, {{submission_date}}, {{submission_time}}
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6b35 0%, #f23005 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .info-section {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            width: 140px;
+            flex-shrink: 0;
+        }
+        .info-value {
+            color: #333;
+            flex: 1;
+        }
+        .info-value a {
+            color: #ff6b35;
+            text-decoration: none;
+        }
+        .message-section {
+            background-color: #fff3e0;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .message-section h3 {
+            margin-top: 0;
+            color: #ff6b35;
+        }
+        .cta-section {
+            text-align: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #ff6b35;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 10px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+            background-color: #f5f5f5;
+        }
+        .urgent-badge {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 New Quote Request</h1>
+            <p>RGV Insulation Experts</p>
+        </div>
+        
+        <div class="content">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #333; margin: 0;">New Customer Lead
+                    <span class="urgent-badge">ACTION REQUIRED</span>
+                </h2>
+                <p style="color: #666; margin-top: 5px;">Received on {{submission_date}} at {{submission_time}}</p>
+            </div>
+            
+            <div class="info-section">
+                <h3 style="margin-top: 0; color: #ff6b35;">📋 Customer Information</h3>
+                <div class="info-row">
+                    <div class="info-label">Name:</div>
+                    <div class="info-value"><strong>{{from_name}}</strong></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Phone:</div>
+                    <div class="info-value">
+                        <a href="tel:{{from_phone}}"><strong>{{from_phone}}</strong></a>
+                        📱
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">
+                        <a href="mailto:{{from_email}}">{{from_email}}</a>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Service Type:</div>
+                    <div class="info-value"><strong>{{service_type}}</strong></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Property Address:</div>
+                    <div class="info-value">{{property_address}}</div>
+                </div>
+            </div>
+            
+            {{#if message}}
+            <div class="message-section">
+                <h3>💬 Customer Message</h3>
+                <p style="margin: 0; white-space: pre-wrap;">{{message}}</p>
+            </div>
+            {{/if}}
+            
+            <div class="cta-section">
+                <p style="font-size: 16px; margin-bottom: 20px;">
+                    <strong>⏰ Remember:</strong> Contact within 24 hours for best conversion!
+                </p>
+                <a href="tel:{{from_phone}}" class="cta-button">📞 Call Customer</a>
+                <a href="mailto:{{from_email}}" class="cta-button" style="background-color: #2196F3;">✉️ Email Customer</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from your website form.</p>
+            <p>RGV Insulation Experts | Serving the Rio Grande Valley</p>
+        </div>
+    </div>
+</body>
+</html>

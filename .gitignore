@@ -34,3 +34,22 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Security and sensitive files
+*.key
+*.pem
+*.cert
+secrets/
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Backup files
+*.backup
+*.bak
+
+# Local Netlify folder
+.netlify

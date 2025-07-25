@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight, Loader2 } from 'lucide-react'
 import './App.css'
+import { sanitizeInput, sanitizePhone, sanitizeEmail, validateFormSecurity, formRateLimiter, getFingerprint, isSubmittedTooQuickly } from './utils/security.js'
 
 // Import images
 import sprayFoamHeroImage from './assets/spray-foam-installation-hero.jpg'
@@ -23,6 +24,9 @@ function App() {
     serviceType: '',
     message: ''
   })
+  
+  // Security state
+  const [formStartTime, setFormStartTime] = useState(null)
 
 
   const [headerState, setHeaderState] = useState({
@@ -64,7 +68,6 @@ function App() {
     const handleScroll = () => {
       const scrollY = window.scrollY
       const windowHeight = window.innerHeight
-      const documentHeight = document.documentElement.scrollHeight
 
       // Mobile-specific scroll behaviors
       if (isMobile) {
@@ -175,9 +178,39 @@ function App() {
   }, [isMobile])
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Start timing when user begins filling form
+    if (!formStartTime) {
+      setFormStartTime(Date.now());
+    }
+    
+    // Sanitize input based on field type
+    let sanitizedValue = value;
+    
+    switch(name) {
+      case 'name':
+      case 'address':
+      case 'message':
+        sanitizedValue = sanitizeInput(value);
+        break;
+      case 'phone':
+        sanitizedValue = sanitizePhone(value);
+        break;
+      case 'email':
+        sanitizedValue = sanitizeEmail(value);
+        break;
+      case 'serviceType':
+        // Service type is from select, just limit length
+        sanitizedValue = value.substring(0, 50);
+        break;
+      default:
+        sanitizedValue = sanitizeInput(value);
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: sanitizedValue
     })
   }
 
@@ -206,8 +239,36 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    // Check rate limiting
+    const fingerprint = getFingerprint();
+    if (!formRateLimiter.isAllowed(fingerprint)) {
+      setRateLimitError(true);
+      setSubmitStatus({
+        type: 'error',
+        message: 'Too many submissions. Please wait a minute and try again.'
+      });
+      return;
+    }
+    
+    // Check if form was submitted too quickly (bot detection)
+    if (formStartTime && isSubmittedTooQuickly(formStartTime, 2)) {
+      setSubmitStatus({
+        type: 'error',
+        message: 'Please take a moment to fill out the form completely.'
+      });
+      return;
+    }
+    
+    // Validate form fields
     if (!validateForm()) {
       return
+    }
+    
+    // Security validation
+    const securityCheck = validateFormSecurity(formData);
+    if (!securityCheck.isValid) {
+      setFormErrors(securityCheck.errors);
+      return;
     }
     
     setIsSubmitting(true)
@@ -242,6 +303,7 @@ function App() {
         serviceType: '',
         message: ''
       })
+      setFormStartTime(null)
       
       // Reset mobile form step
       if (isMobile) {

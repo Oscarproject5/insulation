@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "security:check": "npm audit --audit-level=moderate",
+    "security:audit": "node scripts/security-audit.cjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
