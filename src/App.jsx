@@ -424,23 +424,27 @@ function App() {
       {/* Header with Integrated Navigation */}
       <header className="bg-white fixed top-0 left-0 right-0 z-50 shadow-lg">
         {/* Main Header */}
-        <div className="container mx-auto px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-4 lg:px-8 py-2">
+          <div className="flex items-center justify-between relative">
             
             {/* Brand */}
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-lg shadow-md">
-                <Shield className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2.5 rounded-lg shadow-md">
+                <Shield className="h-7 w-7 text-white" />
               </div>
+              {/* Decorative separator - desktop only */}
+              {!isMobile && (
+                <div className="hidden lg:block absolute left-[260px] top-1/2 -translate-y-1/2 w-[1px] h-12 bg-gradient-to-b from-transparent via-gray-200 to-transparent" />
+              )}
               <div>
-                <h1 className="text-xl font-bold text-gray-900">RGV Insulation Experts</h1>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <h1 className="text-lg font-bold text-gray-900">RGV Insulation Experts</h1>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
                   <span>Licensed & Insured</span>
                   <span className="text-xs">•</span>
                   <div className="flex items-center gap-1">
                     <div className="flex text-yellow-500">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-3 w-3 fill-current" />
+                        <Star key={i} className="h-2.5 w-2.5 fill-current" style={{ animationDelay: `${i * 0.1}s` }} />
                       ))}
                     </div>
                     <span className="font-semibold">4.9</span>
@@ -450,11 +454,25 @@ function App() {
             </div>
             
             {/* Phone Number - THE HERO */}
-            <div className="text-right">
-              <div className="text-sm text-gray-600 mb-1">Call for FREE Quote</div>
+            <div className="text-right relative">
+              {/* Decorative accent */}
+              {!isMobile && (
+                <div className="hidden lg:block absolute -left-20 top-1/2 -translate-y-1/2 w-12 h-12 opacity-10">
+                  <div className="w-full h-full bg-gradient-to-br from-orange-500 to-orange-600 rounded-full animate-pulse" />
+                </div>
+              )}
+              <div className="text-sm text-gray-600 mb-1 flex items-center gap-2 justify-end">
+                <span>Call for FREE Quote</span>
+                {!isMobile && (
+                  <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold animate-pulse">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                    Available Now
+                  </span>
+                )}
+              </div>
               <a 
                 href="tel:+19568540899" 
-                className="text-3xl lg:text-4xl font-black text-orange-600 hover:text-orange-700 block"
+                className="text-2xl lg:text-3xl font-black text-orange-600 hover:text-orange-700 block relative"
               >
                 (956) 854-0899
               </a>
@@ -465,7 +483,7 @@ function App() {
         {/* Navigation Bar */}
         <div className="bg-gray-50 border-t border-gray-200">
           <div className="container mx-auto px-4 lg:px-8">
-            <nav className="flex items-center justify-between py-3">
+            <nav className="flex items-center justify-between py-2">
               <div className="flex items-center space-x-8">
                 <a 
                   href="#services" 
@@ -523,8 +541,7 @@ function App() {
         </div>
       </header>
 
-      {/* Spacer for fixed header */}
-      <div className="h-[120px]"></div>
+      {/* No spacer needed - hero section will handle padding */}
 
       {/* Hero Section */}
       <section id="hero" className="hero-modern grain-overlay relative flex items-center">
@@ -801,7 +818,7 @@ function App() {
                     <div className="neumorphic-inset flex items-center gap-3 px-6 py-3">
                       <div className="flex text-yellow-500">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-5 w-5 fill-current" />
+                          <Star key={i} className="h-5 w-5 fill-current" style={{ animationDelay: `${i * 0.1}s` }} />
                         ))}
                       </div>
                       <span className="font-bold text-gray-900">4.9/5 Rating</span>
