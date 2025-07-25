@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input.jsx'
 import { Textarea } from '@/components/ui/textarea.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight } from 'lucide-react'
+import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight, Loader2 } from 'lucide-react'
 import './App.css'
 
 // Import images
@@ -44,6 +44,11 @@ function App() {
   const [touchStart, setTouchStart] = useState(null)
   const [touchEnd, setTouchEnd] = useState(null)
   const swipeRef = useRef(null)
+  
+  // Form submission state
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' })
+  const [formErrors, setFormErrors] = useState({})
 
   // Detect mobile device
   useEffect(() => {
@@ -176,18 +181,82 @@ function App() {
     })
   }
 
-  const handleSubmit = (e) => {
+  // Form validation
+  const validateForm = () => {
+    const errors = {}
+    
+    if (!formData.name.trim()) {
+      errors.name = 'Name is required'
+    }
+    
+    if (!formData.phone.trim()) {
+      errors.phone = 'Phone number is required'
+    } else if (!/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(formData.phone.replace(/\s/g, ''))) {
+      errors.phone = 'Please enter a valid phone number'
+    }
+    
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Please enter a valid email'
+    }
+    
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // In a real application, this would send data to a backend
-    alert('¡Gracias! We will contact you within 24 hours for your free estimate.')
-    setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      address: '',
-      serviceType: '',
-      message: ''
-    })
+    
+    if (!validateForm()) {
+      return
+    }
+    
+    setIsSubmitting(true)
+    setSubmitStatus({ type: '', message: '' })
+    
+    try {
+      // Netlify Forms submission
+      const form = e.target
+      const formData = new FormData(form)
+      
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData).toString()
+      })
+      
+      if (!response.ok) {
+        throw new Error('Form submission failed')
+      }
+      
+      setSubmitStatus({
+        type: 'success',
+        message: '¡Gracias! We will contact you within 24 hours for your free estimate.'
+      })
+      
+      // Reset form
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        address: '',
+        serviceType: '',
+        message: ''
+      })
+      
+      // Reset mobile form step
+      if (isMobile) {
+        setFormStep(1)
+      }
+      
+    } catch (error) {
+      console.error('Form submission error:', error)
+      setSubmitStatus({
+        type: 'error',
+        message: 'Something went wrong. Please call us at (956) 854-FOAM'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Mobile-specific handlers
@@ -227,6 +296,28 @@ function App() {
   }
 
   const handleMobileFormStep = (step) => {
+    // Validate current step before moving forward
+    if (step > formStep) {
+      const errors = {}
+      
+      if (formStep === 1) {
+        if (!formData.name.trim()) {
+          errors.name = 'Name is required'
+        }
+        if (!formData.phone.trim()) {
+          errors.phone = 'Phone number is required'
+        } else if (!/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(formData.phone.replace(/\s/g, ''))) {
+          errors.phone = 'Please enter a valid phone number'
+        }
+      }
+      
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors)
+        return
+      }
+    }
+    
+    setFormErrors({})
     setFormStep(step)
   }
 
@@ -300,10 +391,10 @@ function App() {
             <div className="text-right">
               <div className="text-sm text-gray-600 mb-1">Call for FREE Quote</div>
               <a 
-                href="tel:9565555555" 
+                href="tel:+19568543626" 
                 className="text-3xl lg:text-4xl font-black text-orange-600 hover:text-orange-700 block"
               >
-                (956) 555-FOAM
+                (956) 854-FOAM
               </a>
             </div>
           </div>
@@ -586,11 +677,11 @@ function App() {
                       Get Instant Quote
                     </Button>
                     <a 
-                      href="tel:9565555555" 
+                      href="tel:+19568543626" 
                       className="btn-primary w-full mobile-ripple text-center block"
                     >
                       <Phone className="inline mr-2 h-4 w-4" />
-                      Call (956) 555-FOAM
+                      Call (956) 854-FOAM
                     </a>
                   </div>
                   <div className="flex items-center justify-between pt-2">
@@ -638,7 +729,7 @@ function App() {
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     <Button size="lg" className="btn-primary mobile-ripple px-8 py-4 text-base font-semibold shadow-xl flex items-center justify-center">
                       <Phone className="mr-2 h-4 w-4" />
-                      Call or Text (956) 555-FOAM
+                      Call or Text (956) 854-FOAM
                     </Button>
                     <Button size="lg" className="btn-outline mobile-touch px-7 py-4 text-lg font-bold">
                       Learn More →
@@ -1219,7 +1310,9 @@ function App() {
               </CardHeader>
               <CardContent className="p-8 bg-white">
                 {isMobile ? (
-                  <form onSubmit={handleSubmit} className="space-y-5">
+                  <form name="quote-form-mobile" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" onSubmit={handleSubmit} className="space-y-5">
+                    <input type="hidden" name="form-name" value="quote-form-mobile" />
+                    <input type="hidden" name="bot-field" />
                     {/* Mobile Progressive Form */}
                     <div className="mobile-form-progress">
                       <div className={`mobile-form-progress-item ${formStep >= 1 ? 'active' : ''}`} />
@@ -1231,24 +1324,32 @@ function App() {
                       <div className="mobile-form-step">
                         <h4 className="text-lg font-bold mb-4">Step 1: Your Information</h4>
                         <div className="space-y-4">
-                          <Input
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            placeholder="Full Name"
-                            required
-                            className="w-full"
-                          />
-                          <Input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            placeholder="Phone Number"
-                            required
-                            className="w-full"
-                          />
+                          <div>
+                            <Input
+                              type="text"
+                              name="name"
+                              value={formData.name}
+                              onChange={handleInputChange}
+                              placeholder="Full Name"
+                              className={`w-full ${formErrors.name ? 'border-red-500' : ''}`}
+                            />
+                            {formErrors.name && (
+                              <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
+                            )}
+                          </div>
+                          <div>
+                            <Input
+                              type="tel"
+                              name="phone"
+                              value={formData.phone}
+                              onChange={handleInputChange}
+                              placeholder="Phone Number"
+                              className={`w-full ${formErrors.phone ? 'border-red-500' : ''}`}
+                            />
+                            {formErrors.phone && (
+                              <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>
+                            )}
+                          </div>
                           <Button 
                             type="button"
                             className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white"
@@ -1343,114 +1444,159 @@ function App() {
                     )}
                   </form>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Full Name *
-                      </label>
-                      <Input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        placeholder="Your full name"
-                        required
-                        className="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Phone Number *
-                      </label>
-                      <Input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="(956) 555-0123"
-                        required
-                        className="w-full"
-                      />
-                    </div>
-                  </div>
+                  <>
+                    {/* Success Message */}
+                    {submitStatus.type === 'success' && (
+                      <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2 text-green-800">
+                          <CheckCircle className="h-5 w-5" />
+                          <p className="font-semibold">{submitStatus.message}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Error Message */}
+                    {submitStatus.type === 'error' && (
+                      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-center gap-2 text-red-800">
+                          <X className="h-5 w-5" />
+                          <p className="font-semibold">{submitStatus.message}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <form name="quote-form" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" onSubmit={handleSubmit} className="space-y-5">
+                      <input type="hidden" name="form-name" value="quote-form" />
+                      <input type="hidden" name="bot-field" />
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Full Name *
+                          </label>
+                          <Input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            placeholder="Your full name"
+                            className={`w-full ${formErrors.name ? 'border-red-500' : ''}`}
+                            disabled={isSubmitting}
+                          />
+                          {formErrors.name && (
+                            <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Phone Number *
+                          </label>
+                          <Input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            placeholder="(956) 854-3626"
+                            className={`w-full ${formErrors.phone ? 'border-red-500' : ''}`}
+                            disabled={isSubmitting}
+                          />
+                          {formErrors.phone && (
+                            <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>
+                          )}
+                        </div>
+                      </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Email Address
-                      </label>
-                      <Input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="your.email@example.com"
-                        className="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Service Needed
-                      </label>
-                      <select
-                        name="serviceType"
-                        value={formData.serviceType}
-                        onChange={handleInputChange}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                      >
-                        <option value="">Select a service</option>
-                        <option value="spray-foam">Spray Foam Insulation</option>
-                        <option value="blown-in">Blown-In Insulation</option>
-                        <option value="attic">Attic Insulation</option>
-                        <option value="energy-audit">Energy Audit</option>
-                        <option value="not-sure">Not Sure - Need Consultation</option>
-                      </select>
-                    </div>
-                  </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Email Address
+                          </label>
+                          <Input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            placeholder="your.email@example.com"
+                            className={`w-full ${formErrors.email ? 'border-red-500' : ''}`}
+                            disabled={isSubmitting}
+                          />
+                          {formErrors.email && (
+                            <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Service Needed
+                          </label>
+                          <select
+                            name="serviceType"
+                            value={formData.serviceType}
+                            onChange={handleInputChange}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                            disabled={isSubmitting}
+                          >
+                            <option value="">Select a service</option>
+                            <option value="spray-foam">Spray Foam Insulation</option>
+                            <option value="blown-in">Blown-In Insulation</option>
+                            <option value="attic">Attic Insulation</option>
+                            <option value="energy-audit">Energy Audit</option>
+                            <option value="not-sure">Not Sure - Need Consultation</option>
+                          </select>
+                        </div>
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Property Address
-                    </label>
-                    <Input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      placeholder="Street address, City, TX"
-                      className="w-full"
-                    />
-                  </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Property Address
+                        </label>
+                        <Input
+                          type="text"
+                          name="address"
+                          value={formData.address}
+                          onChange={handleInputChange}
+                          placeholder="Street address, City, TX"
+                          className="w-full"
+                          disabled={isSubmitting}
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Tell us about your project (optional)
-                    </label>
-                    <Textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      placeholder="High energy bills, hot rooms, old insulation, new construction, etc."
-                      rows={4}
-                      className="w-full"
-                    />
-                  </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Tell us about your project (optional)
+                        </label>
+                        <Textarea
+                          name="message"
+                          value={formData.message}
+                          onChange={handleInputChange}
+                          placeholder="High energy bills, hot rooms, old insulation, new construction, etc."
+                          rows={4}
+                          className="w-full"
+                          disabled={isSubmitting}
+                        />
+                      </div>
 
-                  <div className="text-center">
-                    <Button 
-                      type="submit" 
-                      size="lg" 
-                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-10 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                    >
-                      Get My FREE Estimate
-                    </Button>
-                    <p className="text-xs text-gray-500 mt-4 leading-relaxed">
-                      By submitting this form, you agree to receive text messages and calls about our services. 
-                      Message and data rates may apply. You can opt out at any time.
-                    </p>
-                  </div>
-                  </form>
+                      <div className="text-center">
+                        <Button 
+                          type="submit" 
+                          size="lg" 
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-10 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                              Sending...
+                            </>
+                          ) : (
+                            'Get My FREE Estimate'
+                          )}
+                        </Button>
+                        <p className="text-xs text-gray-500 mt-4 leading-relaxed">
+                          By submitting this form, you agree to receive text messages and calls about our services. 
+                          Message and data rates may apply. You can opt out at any time.
+                        </p>
+                      </div>
+                    </form>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -1501,7 +1647,7 @@ function App() {
 
           {/* Mobile Floating Phone Button */}
           <a 
-            href="tel:9565555555" 
+            href="tel:+19568543626" 
             className="mobile-float-phone lg:hidden mobile-touch"
             aria-label="Call us now"
           >
@@ -1565,7 +1711,7 @@ function App() {
               <div className="space-y-2 text-sm text-gray-400">
                 <div className="flex items-center space-x-2">
                   <Phone className="h-4 w-4" />
-                  <span>(956) 555-FOAM</span>
+                  <span>(956) 854-FOAM</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
