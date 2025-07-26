@@ -820,7 +820,7 @@ html, body {
   /* Floating Phone Button - Mobile Only */
   .mobile-float-phone {
     position: fixed;
-    bottom: 20px;
+    bottom: 76px;
     right: 20px;
     width: 56px;
     height: 56px;

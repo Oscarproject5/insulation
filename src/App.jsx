@@ -16,14 +16,35 @@ import atticInsulationNewImage from './assets/attic-insulation-new.jpg'
 import professionalTeamSprayImage from './assets/professional-team-spray.jpg'
 
 function App() {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    serviceType: '',
-    message: ''
-  })
+  // Load saved form data from localStorage
+  const loadSavedFormData = () => {
+    const saved = localStorage.getItem('rgv_form_data');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  // Initialize form data with saved values or URL parameters
+  const initializeFormData = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const savedData = loadSavedFormData();
+    
+    return {
+      name: urlParams.get('name') || savedData?.name || '',
+      phone: urlParams.get('phone') || savedData?.phone || '',
+      email: urlParams.get('email') || savedData?.email || '',
+      address: urlParams.get('address') || savedData?.address || '',
+      serviceType: urlParams.get('service') || savedData?.serviceType || '',
+      message: urlParams.get('message') || savedData?.message || ''
+    };
+  };
+
+  const [formData, setFormData] = useState(initializeFormData())
   
   // Security state
   const [formStartTime, setFormStartTime] = useState(null)
@@ -165,9 +186,9 @@ function App() {
         
         // Calculate realistic energy savings based on temperature
         // Average AC cost in RGV: ~$200-400/month in summer
-        // Poor insulation can increase by 40%
+        // Poor insulation can increase by 35%
         const baseMonthlyACCost = displayTemp > 85 ? 250 : 150
-        const poorInsulationMultiplier = 1.4
+        const poorInsulationMultiplier = 1.35
         const wellInsulatedCost = baseMonthlyACCost
         const poorlyInsulatedCost = baseMonthlyACCost * poorInsulationMultiplier
         const energySavings = Math.round(poorlyInsulatedCost - wellInsulatedCost)
@@ -293,10 +314,15 @@ function App() {
         sanitizedValue = sanitizeInput(value);
     }
     
-    setFormData({
+    const newFormData = {
       ...formData,
       [name]: sanitizedValue
-    })
+    };
+    
+    setFormData(newFormData);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('rgv_form_data', JSON.stringify(newFormData));
   }
 
   // Form validation
@@ -379,15 +405,17 @@ function App() {
         message: '¡Gracias! We will contact you within 24 hours for your free estimate.'
       })
       
-      // Reset form
-      setFormData({
-        name: '',
-        phone: '',
-        email: '',
+      // Reset form but keep name/phone/email for future visits
+      const resetData = {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
         address: '',
         serviceType: '',
         message: ''
-      })
+      };
+      setFormData(resetData);
+      localStorage.setItem('rgv_form_data', JSON.stringify(resetData));
       setFormStartTime(null)
       
       // Reset mobile form step
@@ -523,7 +551,7 @@ function App() {
       {
         id: 3,
         question: "Will new insulation really lower my electric bill?",
-        answer: "Yes! In the Rio Grande Valley's extreme heat, proper insulation can reduce cooling costs by 30-40%. Most of our McAllen and Edinburg customers see savings of $150-$400 per month during summer. Your exact savings depend on your current insulation, AC efficiency, and home size."
+        answer: "Yes! In the Rio Grande Valley's extreme heat, proper insulation can reduce cooling costs by 25-35%. Most of our McAllen and Edinburg customers see savings of $150-$350 per month during summer. Your exact savings depend on your current insulation, AC efficiency, and home size."
       },
       {
         id: 4,
@@ -726,7 +754,7 @@ function App() {
   )
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen bg-white ${isMobile ? 'pb-24' : ''}`}>
       {/* Modals */}
       <PrivacyModal />
       <TermsModal />
@@ -734,13 +762,13 @@ function App() {
       {/* Header with Integrated Navigation */}
       <header className="bg-white fixed top-0 left-0 right-0 z-50 shadow-lg">
         {/* Main Header */}
-        <div className="container mx-auto px-4 lg:px-8 py-2">
+        <div className={`container mx-auto px-4 lg:px-8 ${isMobile ? 'py-1' : 'py-2'}`}>
           <div className="flex items-center justify-between relative">
             
             {/* Brand */}
             <div className="flex items-center gap-3">
-              <div className={`${isMobile ? 'bg-gradient-to-br from-orange-500 to-orange-600 p-3 rounded-xl shadow-lg' : 'bg-gradient-to-br from-orange-500 to-orange-600 p-2.5 rounded-lg shadow-md'}`}>
-                <Shield className={`${isMobile ? 'h-8 w-8' : 'h-7 w-7'} text-white`} />
+              <div className={`${isMobile ? 'bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-lg shadow-md' : 'bg-gradient-to-br from-orange-500 to-orange-600 p-2.5 rounded-lg shadow-md'}`}>
+                <Shield className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'} text-white`} />
               </div>
               {/* Decorative separator - desktop only */}
               {!isMobile && (
@@ -783,7 +811,7 @@ function App() {
                   <div className="w-full h-full bg-gradient-to-br from-orange-500 to-orange-600 rounded-full animate-pulse" />
                 </div>
               )}
-              <div className="text-sm text-gray-600 mb-1 flex items-center gap-2 justify-end">
+              <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 mb-1 flex items-center gap-2 justify-end`}>
                 <span>Call for FREE Quote</span>
                 {!isMobile && (
                   <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold animate-pulse">
@@ -794,7 +822,7 @@ function App() {
               </div>
               <a 
                 href="tel:+19568540899" 
-                className="text-2xl lg:text-3xl font-black text-orange-600 hover:text-orange-700 block relative"
+                className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} font-black text-orange-600 hover:text-orange-700 block relative`}
               >
                 (956) 854-0899
               </a>
@@ -802,71 +830,12 @@ function App() {
           </div>
         </div>
         
-        {/* Navigation Bar */}
-        <div className="bg-gray-50 border-t border-gray-200">
-          <div className="container mx-auto px-4 lg:px-8">
-            <nav className="flex items-center justify-between py-2">
-              <div className="flex items-center space-x-8">
-                <a 
-                  href="#services" 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
-                  }}
-                  className="text-gray-700 hover:text-orange-600 font-medium text-sm transition-colors cursor-pointer"
-                >
-                  Our Services
-                </a>
-                <a 
-                  href="#about" 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
-                  }}
-                  className="text-gray-700 hover:text-orange-600 font-medium text-sm transition-colors hidden sm:inline-block cursor-pointer"
-                >
-                  Why Choose Us
-                </a>
-                <a 
-                  href="#areas" 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    document.getElementById('areas')?.scrollIntoView({ behavior: 'smooth' })
-                  }}
-                  className="text-gray-700 hover:text-orange-600 font-medium text-sm transition-colors cursor-pointer"
-                >
-                  Service Areas
-                </a>
-              </div>
-              <div className="flex items-center gap-4">
-                {!isMobile && (
-                  <div className="hidden lg:flex items-center gap-2 text-sm text-gray-600">
-                    <Thermometer className="h-4 w-4" />
-                    <span className="font-semibold">{headerState.currentTemp}°F</span>
-                    <span className="text-xs">•</span>
-                    <span className="text-xs">{headerState.isNight ? "Today's High" : "Current Temp"}</span>
-                  </div>
-                )}
-                <a 
-                  href="#quote" 
-                  onClick={(e) => {
-                    e.preventDefault()
-                    document.getElementById('quote')?.scrollIntoView({ behavior: 'smooth' })
-                  }}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-2 rounded-full font-bold text-sm transition-all hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
-                >
-                  Get Free Quote →
-                </a>
-              </div>
-            </nav>
-          </div>
-        </div>
       </header>
 
       {/* No spacer needed - hero section will handle padding */}
 
       {/* Hero Section */}
-      <section id="hero" className="hero-modern grain-overlay relative flex items-center" style={{ marginTop: isMobile ? '120px' : '0' }}>
+      <section id="hero" className="hero-modern grain-overlay relative flex items-center" style={{ marginTop: isMobile ? '60px' : '0' }}>
         {!isMobile && (
           <>
             <div className="geometric-shape w-96 h-96 -top-20 -right-20" />
@@ -1053,10 +1022,7 @@ function App() {
                       <div className="inline-flex items-center gap-2 bg-red-500/90 text-white px-3 py-1 rounded-full mb-4 text-xs font-medium">
                         <Thermometer className="h-3 w-3" />
                         <span>
-                          {headerState.isNight 
-                            ? `${headerState.todaysHigh}°F Today's High` 
-                            : `${headerState.currentTemp}°F now • Feels like ${headerState.realFeelsLike}°F`
-                          }
+                          Current Temp: {headerState.currentTemp}°F
                         </span>
                       </div>
                       
@@ -1071,7 +1037,10 @@ function App() {
                       {/* Value proposition */}
                       <div className="text-center mb-4">
                         <p className="text-lg text-gray-700 font-medium">Cut your cooling costs by up to</p>
-                        <span className="text-4xl font-black text-green-600">40%</span>
+                        <div className="relative inline-block my-2">
+                          <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">35%</span>
+                          <div className="absolute -inset-1 bg-gradient-to-r from-green-600 to-emerald-600 opacity-20 blur-xl rounded-full"></div>
+                        </div>
                         <p className="text-sm text-gray-600 mt-1">With proper insulation</p>
                       </div>
                       
@@ -1093,7 +1062,7 @@ function App() {
                         {/* Three key metrics */}
                         <div className="grid grid-cols-3 gap-2 text-center">
                           <div className="bg-red-50 rounded-lg py-3 px-2">
-                            <p className="text-xl font-bold text-red-600">40%</p>
+                            <p className="text-xl font-bold text-red-600">35%</p>
                             <p className="text-xs text-gray-600">Energy Lost</p>
                           </div>
                           <div className="bg-orange-50 rounded-lg py-3 px-2">
@@ -1191,7 +1160,7 @@ function App() {
                     <Thermometer className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <p className="font-black text-3xl text-gray-900">40%</p>
+                    <p className="font-black text-3xl text-gray-900">35%</p>
                     <p className="text-gray-600 font-semibold text-sm">Energy Savings</p>
                     <p className="text-xs text-green-600 font-bold mt-1 flex items-center">
                       <CheckCircle className="h-3 w-3 mr-1" />
@@ -1261,7 +1230,7 @@ function App() {
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span className="text-xs text-gray-700">40% energy savings</span>
+                        <span className="text-xs text-gray-700">35% energy savings</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
@@ -1365,7 +1334,7 @@ function App() {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-sm mb-4 text-gray-600 leading-relaxed">
-                  The gold standard for RGV homes. Creates an air-tight seal that blocks hot, humid air and reduces energy costs by up to 40%.
+                  The gold standard for RGV homes. Creates an air-tight seal that blocks hot, humid air and reduces energy costs by up to 35%.
                 </CardDescription>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3">
@@ -1513,7 +1482,7 @@ function App() {
                     </div>
                     <p className="text-xs text-gray-600 mb-2">Complete attic insulation - McAllen home</p>
                     <div className="flex items-center gap-4 text-xs">
-                      <span className="text-green-600 font-semibold">-40% cooling costs</span>
+                      <span className="text-green-600 font-semibold">-35% cooling costs</span>
                       <span className="text-gray-500">2,400 sq ft</span>
                     </div>
                   </div>
@@ -1875,6 +1844,7 @@ function App() {
                               value={formData.name}
                               onChange={handleInputChange}
                               placeholder="Full Name"
+                              autoComplete="name"
                               className={`w-full ${formErrors.name ? 'border-red-500' : ''}`}
                             />
                             {formErrors.name && (
@@ -1888,6 +1858,7 @@ function App() {
                               value={formData.phone}
                               onChange={handleInputChange}
                               placeholder="Phone Number"
+                              autoComplete="tel"
                               className={`w-full ${formErrors.phone ? 'border-red-500' : ''}`}
                             />
                             {formErrors.phone && (
@@ -2023,6 +1994,7 @@ function App() {
                             value={formData.name}
                             onChange={handleInputChange}
                             placeholder="Your full name"
+                            autoComplete="name"
                             className={`w-full ${formErrors.name ? 'border-red-500' : ''}`}
                             disabled={isSubmitting}
                           />
@@ -2040,6 +2012,7 @@ function App() {
                             value={formData.phone}
                             onChange={handleInputChange}
                             placeholder="(956) 854-0899"
+                            autoComplete="tel"
                             className={`w-full ${formErrors.phone ? 'border-red-500' : ''}`}
                             disabled={isSubmitting}
                           />
@@ -2060,6 +2033,7 @@ function App() {
                             value={formData.email}
                             onChange={handleInputChange}
                             placeholder="your.email@example.com"
+                            autoComplete="email"
                             className={`w-full ${formErrors.email ? 'border-red-500' : ''}`}
                             disabled={isSubmitting}
                           />
@@ -2098,6 +2072,7 @@ function App() {
                           value={formData.address}
                           onChange={handleInputChange}
                           placeholder="Street address, City, TX"
+                          autoComplete="street-address"
                           className="w-full"
                           disabled={isSubmitting}
                         />
@@ -2349,6 +2324,7 @@ function App() {
                       placeholder="Your name"
                       value={formData.name}
                       onChange={handleInputChange}
+                      autoComplete="name"
                       required
                       className="w-full px-4 py-3 border rounded-xl text-sm"
                     />
@@ -2358,6 +2334,7 @@ function App() {
                       placeholder="Phone number"
                       value={formData.phone}
                       onChange={handleInputChange}
+                      autoComplete="tel"
                       required
                       className="w-full px-4 py-3 border rounded-xl text-sm"
                     />
