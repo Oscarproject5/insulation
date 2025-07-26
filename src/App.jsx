@@ -653,6 +653,11 @@ function App() {
     if (isRightSwipe) handleSwipe('right')
   }, [touchStart, touchEnd])
 
+  // Memoized callback for showing bottom sheet
+  const handleShowBottomSheet = useCallback(() => {
+    setShowBottomSheet(true)
+  }, [])
+
   const handleMobileFormStep = (step) => {
     // Validate current step before moving forward
     if (step > formStep) {
@@ -1096,7 +1101,7 @@ function App() {
                     <Button 
                       size="lg" 
                       className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 text-base shadow-xl mobile-hero-button"
-                      onClick={useCallback(() => setShowBottomSheet(true), [])}
+                      onClick={handleShowBottomSheet}
                     >
                       Get Free Quote →
                     </Button>
