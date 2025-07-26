@@ -49,6 +49,16 @@ function App() {
   const [touchEnd, setTouchEnd] = useState(null)
   const swipeRef = useRef(null)
   
+  // Innovative mobile states
+  const [showBottomSheet, setShowBottomSheet] = useState(false)
+  const [showStoryMode, setShowStoryMode] = useState(false)
+  const [currentStory, setCurrentStory] = useState(0)
+  const [energyCalculator, setEnergyCalculator] = useState({ sqft: '', currentBill: '', savings: null })
+  const [pullProgress, setPullProgress] = useState(0)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [hapticEnabled, setHapticEnabled] = useState(true)
+  const [voiceInput, setVoiceInput] = useState(false)
+  
   // Form submission state
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' })
@@ -149,7 +159,7 @@ function App() {
         
         // Use today's high temp at night, current temp during day
         const displayTemp = isNight ? todaysHigh : currentTemp
-        const displayFeelsLike = isNight ? todaysHigh + 8 : realFeelsLike
+        const displayFeelsLike = realFeelsLike
         
         const isExtremeHeat = displayTemp > 95
         
@@ -193,7 +203,7 @@ function App() {
         
         setHeaderState({
           currentTemp: isNight ? fallbackHigh : fallbackCurrent,
-          realFeelsLike: isNight ? fallbackHigh + 8 : 98,
+          realFeelsLike: 98,
           energySavings: 263,
           isExtremeHeat: false,
           timeOfDay: isNight ? 'night' : 'afternoon',
@@ -209,17 +219,48 @@ function App() {
     return () => clearInterval(interval)
   }, [])
 
-  // Mobile lead widget timer - DISABLED
+  // Mobile touch event handlers
   useEffect(() => {
     if (isMobile) {
-      // Popup disabled
-      // const timer = setTimeout(() => {
-      //   setShowLeadWidget(true)
-      // }, 15000) // Show after 15 seconds on mobile
+      let startY = 0
+      let currentY = 0
       
-      // return () => clearTimeout(timer)
+      const handleTouchStart = (e) => {
+        if (window.scrollY === 0) {
+          startY = e.touches[0].clientY
+        }
+      }
+      
+      const handleTouchMove = (e) => {
+        if (startY > 0) {
+          currentY = e.touches[0].clientY
+          const diff = currentY - startY
+          if (diff > 0 && window.scrollY === 0) {
+            setPullProgress(Math.min(diff, 100))
+          }
+        }
+      }
+      
+      const handleTouchEnd = () => {
+        handlePullToRefresh()
+        startY = 0
+        currentY = 0
+        if (!isRefreshing) {
+          setPullProgress(0)
+        }
+      }
+      
+      document.addEventListener('touchstart', handleTouchStart)
+      document.addEventListener('touchmove', handleTouchMove)
+      document.addEventListener('touchend', handleTouchEnd)
+      
+      return () => {
+        document.removeEventListener('touchstart', handleTouchStart)
+        document.removeEventListener('touchmove', handleTouchMove)
+        document.removeEventListener('touchend', handleTouchEnd)
+      }
     }
-  }, [isMobile])
+  }, [isMobile, isRefreshing])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -372,6 +413,43 @@ function App() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' })
     }
+    if (hapticEnabled && 'vibrate' in navigator) {
+      navigator.vibrate(10)
+    }
+  }
+  
+  // Pull to refresh handler
+  const handlePullToRefresh = async () => {
+    if (pullProgress > 80) {
+      setIsRefreshing(true)
+      await fetchWeatherData()
+      setTimeout(() => {
+        setIsRefreshing(false)
+        setPullProgress(0)
+      }, 1000)
+    }
+  }
+  
+  // Calculate energy savings
+  const calculateSavings = () => {
+    const { sqft, currentBill } = energyCalculator
+    if (sqft && currentBill) {
+      const avgSavings = 0.35 // 35% average savings
+      const monthlySavings = Math.round(currentBill * avgSavings)
+      const yearlySavings = monthlySavings * 12
+      setEnergyCalculator({ ...energyCalculator, savings: { monthly: monthlySavings, yearly: yearlySavings } })
+    }
+  }
+  
+  // Story navigation
+  const nextStory = () => {
+    setCurrentStory((prev) => (prev + 1) % 3)
+    if (hapticEnabled && 'vibrate' in navigator) navigator.vibrate(5)
+  }
+  
+  const prevStory = () => {
+    setCurrentStory((prev) => (prev - 1 + 3) % 3)
+    if (hapticEnabled && 'vibrate' in navigator) navigator.vibrate(5)
   }
 
   const handleSwipe = (direction) => {
@@ -661,28 +739,40 @@ function App() {
             
             {/* Brand */}
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2.5 rounded-lg shadow-md">
-                <Shield className="h-7 w-7 text-white" />
+              <div className={`${isMobile ? 'bg-gradient-to-br from-orange-500 to-orange-600 p-3 rounded-xl shadow-lg' : 'bg-gradient-to-br from-orange-500 to-orange-600 p-2.5 rounded-lg shadow-md'}`}>
+                <Shield className={`${isMobile ? 'h-8 w-8' : 'h-7 w-7'} text-white`} />
               </div>
               {/* Decorative separator - desktop only */}
               {!isMobile && (
                 <div className="hidden lg:block absolute left-[260px] top-1/2 -translate-y-1/2 w-[1px] h-12 bg-gradient-to-b from-transparent via-gray-200 to-transparent" />
               )}
-              <div>
-                <h1 className="text-lg font-bold text-gray-900">RGV Insulation Experts</h1>
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <span>Licensed & Insured</span>
-                  <span className="text-xs">•</span>
-                  <div className="flex items-center gap-1">
-                    <div className="flex text-yellow-500">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-2.5 w-2.5 fill-current" style={{ animationDelay: `${i * 0.1}s` }} />
-                      ))}
+              {!isMobile && (
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">RGV Insulation Experts</h1>
+                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                    <span>Licensed & Insured</span>
+                    <span className="text-xs">•</span>
+                    <div className="flex items-center gap-1">
+                      <div className="flex text-yellow-500">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-2.5 w-2.5 fill-current" style={{ animationDelay: `${i * 0.1}s` }} />
+                        ))}
+                      </div>
+                      <span className="font-semibold">4.9</span>
                     </div>
-                    <span className="font-semibold">4.9</span>
                   </div>
                 </div>
-              </div>
+              )}
+              {isMobile && (
+                <div>
+                  <h1 className="text-base font-bold text-gray-900">RGV Insulation<br/>Experts</h1>
+                  <div className="flex items-center gap-1 text-xs text-gray-600">
+                    <span>Licensed &</span>
+                    <br className="hidden" />
+                    <span>Insured</span>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Phone Number - THE HERO */}
@@ -776,7 +866,7 @@ function App() {
       {/* No spacer needed - hero section will handle padding */}
 
       {/* Hero Section */}
-      <section id="hero" className="hero-modern grain-overlay relative flex items-center">
+      <section id="hero" className="hero-modern grain-overlay relative flex items-center" style={{ marginTop: isMobile ? '120px' : '0' }}>
         {!isMobile && (
           <>
             <div className="geometric-shape w-96 h-96 -top-20 -right-20" />
@@ -954,71 +1044,90 @@ function App() {
               {isMobile ? (
                 <>
                   {/* Mobile-specific hero content */}
-                  <div className="mobile-glass-card mb-4 p-3 inline-flex items-center gap-2">
-                    <div className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-semibold">RGV's #1 Insulation Service</span>
-                  </div>
-                  <h2 className="text-2xl font-black text-gray-900 leading-tight">
-                    Stop Wasting Money on
-                    <span className="mobile-gradient-text"> High AC Bills</span>
-                  </h2>
-                  <div className="mobile-glass-card">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className="text-xs text-gray-600">{headerState.isNight ? "Today's Temperature" : "Current Temperature"}</p>
-                        <p className="text-2xl font-black text-orange-600">{headerState.currentTemp}°F</p>
+                  <div className="relative">
+                    {/* Animated heat wave effect */}
+                    <div className="absolute -top-8 -left-8 -right-8 h-40 bg-gradient-to-b from-red-500/20 via-orange-500/10 to-transparent rounded-full blur-2xl animate-pulse" />
+                    
+                    <div className="relative z-10">
+                      {/* Simplified temperature badge */}
+                      <div className="inline-flex items-center gap-2 bg-red-500/90 text-white px-3 py-1 rounded-full mb-4 text-xs font-medium">
+                        <Thermometer className="h-3 w-3" />
+                        <span>
+                          {headerState.isNight 
+                            ? `${headerState.todaysHigh}°F Today's High` 
+                            : `${headerState.currentTemp}°F now • Feels like ${headerState.realFeelsLike}°F`
+                          }
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-600">You're losing</p>
-                        <p className="text-2xl font-black text-red-600">${headerState.energySavings}/mo</p>
+                      
+                      {/* Simplified headline */}
+                      <h2 className="text-3xl font-black text-gray-900 leading-tight mb-4">
+                        Stop Wasting Money on
+                        <span className="block text-3xl text-orange-600">
+                          High AC Bills
+                        </span>
+                      </h2>
+                      
+                      {/* Value proposition */}
+                      <div className="text-center mb-4">
+                        <p className="text-lg text-gray-700 font-medium">Cut your cooling costs by up to</p>
+                        <span className="text-4xl font-black text-green-600">40%</span>
+                        <p className="text-sm text-gray-600 mt-1">With proper insulation</p>
+                      </div>
+                      
+                      {/* Streamlined metrics card */}
+                      <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
+                        {/* Simple heat indicator */}
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-semibold text-gray-700">Poor Insulation Impact:</span>
+                          </div>
+                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full"
+                              style={{ width: `${Math.min((headerState.currentTemp / 100) * 100, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* Three key metrics */}
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div className="bg-red-50 rounded-lg py-3 px-2">
+                            <p className="text-xl font-bold text-red-600">40%</p>
+                            <p className="text-xs text-gray-600">Energy Lost</p>
+                          </div>
+                          <div className="bg-orange-50 rounded-lg py-3 px-2">
+                            <p className="text-xl font-bold text-orange-600">3x</p>
+                            <p className="text-xs text-gray-600">AC Works</p>
+                          </div>
+                          <div className="bg-green-50 rounded-lg py-3 px-2">
+                            <p className="text-xl font-bold text-green-600">$189</p>
+                            <p className="text-xs text-gray-600">Save/Mo</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3">
-                      <p className="text-xs font-semibold text-gray-700">💡 Smart Tip</p>
-                      <p className="text-xs text-gray-600 mt-1">Proper insulation can cut cooling costs by 40% in the Valley heat</p>
-                    </div>
                   </div>
-                  <div className="space-y-3">
+                  {/* Simplified CTA section */}
+                  <div className="mt-6 space-y-3">
                     <Button 
                       size="lg" 
-                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white mobile-interactive"
-                      onClick={() => setShowLeadWidget(true)}
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 text-lg shadow-xl"
+                      onClick={() => setShowBottomSheet(true)}
                     >
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Get Instant Quote
+                      Get Free Quote →
                     </Button>
-                    <a 
-                      href="tel:+19568540899" 
-                      className="btn-primary w-full mobile-ripple text-center block"
-                    >
-                      <Phone className="inline mr-2 h-4 w-4" />
-                      Call (956) 854-0899
-                    </a>
-                  </div>
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center gap-2">
-                      <div className="flex -space-x-2">
-                        {[...Array(4)].map((_, i) => (
-                          <div 
-                            key={i} 
-                            className="w-8 h-8 rounded-full border-2 border-white overflow-hidden"
-                            style={{
-                              background: `linear-gradient(135deg, ${
-                                ['#FF6B35', '#10B981', '#3B82F6', '#8B5CF6'][i]
-                              } 0%, ${
-                                ['#FF5722', '#059669', '#2563EB', '#7C3AED'][i]
-                              } 100%)`
-                            }}
-                          >
-                            <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">
-                              {['JM', 'RS', 'AL', 'MG'][i]}
-                            </div>
-                          </div>
-                        ))}
+                    
+                    {/* Trust indicators */}
+                    <div className="flex items-center justify-center gap-4 text-xs text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <Shield className="h-4 w-4 text-green-600" />
+                        <span>Licensed & Insured</span>
                       </div>
-                      <p className="text-xs text-gray-600">
-                        <span className="font-bold">47 neighbors</span> saved this month
-                      </p>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4 text-blue-600" />
+                        <span>Same Day Service</span>
+                      </div>
                     </div>
                   </div>
                 </>
@@ -1676,127 +1785,6 @@ function App() {
         </div>
       </section>
 
-      {/* Gallery/Portfolio Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Our Work Speaks for Itself
-            </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Professional insulation installations across the Rio Grande Valley
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {/* Gallery Item 1 */}
-            <div className="group relative overflow-hidden rounded-xl shadow-lg">
-              <img 
-                src={professionalTeamSprayImage}
-                alt="Spray foam insulation installation"
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h4 className="font-bold text-lg mb-1">Spray Foam Installation</h4>
-                  <p className="text-sm">Complete attic insulation - McAllen home</p>
-                </div>
-              </div>
-              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="h-5 w-5 text-gray-800" />
-              </div>
-            </div>
-            
-            {/* Gallery Item 2 */}
-            <div className="group relative overflow-hidden rounded-xl shadow-lg">
-              <img 
-                src={blownInsulationNewImage}
-                alt="Blown-in insulation service"
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h4 className="font-bold text-lg mb-1">Blown-In Insulation</h4>
-                  <p className="text-sm">Attic upgrade with R-38 rating</p>
-                </div>
-              </div>
-              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="h-5 w-5 text-gray-800" />
-              </div>
-            </div>
-            
-            {/* Gallery Item 3 */}
-            <div className="group relative overflow-hidden rounded-xl shadow-lg">
-              <img 
-                src={atticInsulationNewImage}
-                alt="Attic insulation project"
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h4 className="font-bold text-lg mb-1">Complete Attic Solution</h4>
-                  <p className="text-sm">Insulation + radiant barrier installation</p>
-                </div>
-              </div>
-              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="h-5 w-5 text-gray-800" />
-              </div>
-            </div>
-            
-            {/* Gallery Item 4 */}
-            <div className="group relative overflow-hidden rounded-xl shadow-lg">
-              <img 
-                src={professionalTeamImage}
-                alt="Professional insulation team"
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h4 className="font-bold text-lg mb-1">Expert Team at Work</h4>
-                  <p className="text-sm">Professional installation crew</p>
-                </div>
-              </div>
-              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="h-5 w-5 text-gray-800" />
-              </div>
-            </div>
-            
-            {/* Gallery Item 5 */}
-            <div className="group relative overflow-hidden rounded-xl shadow-lg">
-              <img 
-                src={sprayFoamHeroImage}
-                alt="Energy efficient home"
-                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h4 className="font-bold text-lg mb-1">Energy Efficiency Results</h4>
-                  <p className="text-sm">40% reduction in cooling costs</p>
-                </div>
-              </div>
-              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="h-5 w-5 text-gray-800" />
-              </div>
-            </div>
-            
-            {/* Gallery Item 6 - CTA */}
-            <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-lg flex items-center justify-center text-white p-8">
-              <div className="text-center">
-                <Camera className="h-12 w-12 mx-auto mb-4 opacity-80" />
-                <h4 className="font-bold text-xl mb-2">See Your Home Here</h4>
-                <p className="text-sm mb-4">Get your free estimate today</p>
-                <Button 
-                  className="bg-white text-orange-600 hover:bg-gray-100"
-                  onClick={() => document.getElementById('quote')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  Get Started →
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4 lg:px-8">
@@ -2163,6 +2151,262 @@ function App() {
       {/* Mobile-Only Components */}
       {isMobile && (
         <>
+          {/* Pull to Refresh Indicator */}
+          {pullProgress > 0 && (
+            <div className="fixed top-0 left-0 right-0 z-60 bg-white shadow-md transition-all duration-300"
+                 style={{ height: `${Math.min(pullProgress, 100)}px` }}>
+              <div className="flex items-center justify-center h-full">
+                {isRefreshing ? (
+                  <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+                ) : (
+                  <div className="text-center">
+                    <ChevronDown className={`h-6 w-6 text-orange-500 transition-transform ${pullProgress > 80 ? 'rotate-180' : ''}`} />
+                    <p className="text-xs text-gray-600 mt-1">
+                      {pullProgress > 80 ? 'Release to refresh' : 'Pull to refresh'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Story Mode Services */}
+          {showStoryMode && (
+            <div className="fixed inset-0 z-50 bg-black">
+              <div className="relative h-full" onClick={nextStory}>
+                {/* Story Progress Bar */}
+                <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-2">
+                  {[0, 1, 2].map((index) => (
+                    <div key={index} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-white transition-all duration-300"
+                        style={{ width: currentStory > index ? '100%' : currentStory === index ? '50%' : '0%' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Story Content */}
+                <div className="h-full flex items-center justify-center px-8">
+                  {currentStory === 0 && (
+                    <div className="text-center text-white">
+                      <div className="mb-8">
+                        <img src={sprayFoamHeroImage} alt="Spray Foam" className="w-full h-64 object-cover rounded-2xl mb-4" />
+                      </div>
+                      <h2 className="text-3xl font-bold mb-4">Spray Foam Insulation</h2>
+                      <p className="text-lg mb-6">The ultimate solution for RGV homes</p>
+                      <div className="space-y-2 text-left max-w-sm mx-auto">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span>Up to 50% energy savings</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span>Lifetime warranty</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span>Same-day installation</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {currentStory === 1 && (
+                    <div className="text-center text-white">
+                      <div className="mb-8">
+                        <img src={blownInsulationNewImage} alt="Blown-In" className="w-full h-64 object-cover rounded-2xl mb-4" />
+                      </div>
+                      <h2 className="text-3xl font-bold mb-4">Blown-In Insulation</h2>
+                      <p className="text-lg mb-6">Perfect for existing homes</p>
+                      <div className="space-y-2 text-left max-w-sm mx-auto">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span>No demolition needed</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span>Quick installation</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span>Budget-friendly option</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {currentStory === 2 && (
+                    <div className="text-center text-white">
+                      <div className="mb-8">
+                        <img src={atticInsulationNewImage} alt="Energy Audit" className="w-full h-64 object-cover rounded-2xl mb-4" />
+                      </div>
+                      <h2 className="text-3xl font-bold mb-4">Free Energy Audit</h2>
+                      <p className="text-lg mb-6">Discover your savings potential</p>
+                      <div className="space-y-2 text-left max-w-sm mx-auto">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span>Thermal imaging included</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span>Personalized report</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-400" />
+                          <span>No obligation quote</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Story Controls */}
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setShowStoryMode(false); }}
+                  className="absolute top-4 right-4 text-white p-2"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+                
+                <button 
+                  onClick={(e) => { e.stopPropagation(); prevStory(); }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-2"
+                >
+                  <ChevronDown className="h-8 w-8 rotate-90" />
+                </button>
+                
+                <button 
+                  className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-8 py-3 rounded-full font-bold"
+                  onClick={(e) => { e.stopPropagation(); setShowStoryMode(false); setShowBottomSheet(true); }}
+                >
+                  Get Free Quote
+                </button>
+              </div>
+            </div>
+          )}
+
+
+          {/* Bottom Sheet Lead Form */}
+          {showBottomSheet && (
+            <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setShowBottomSheet(false)}>
+              <div 
+                className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl transition-transform"
+                onClick={(e) => e.stopPropagation()}
+                style={{ maxHeight: '90vh', overflowY: 'auto' }}
+              >
+                {/* Handle Bar */}
+                <div className="sticky top-0 bg-white pt-4 pb-2">
+                  <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-center mb-2">Get Your Free Quote</h3>
+                  <p className="text-sm text-gray-600 text-center mb-4">Takes only 30 seconds</p>
+                </div>
+                
+                <div className="px-6 pb-8">
+                  {/* Energy Calculator */}
+                  <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-4 mb-6">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-yellow-500" />
+                      Calculate Your Savings
+                    </h4>
+                    <div className="space-y-3">
+                      <input
+                        type="number"
+                        placeholder="Home size (sq ft)"
+                        value={energyCalculator.sqft}
+                        onChange={(e) => setEnergyCalculator({...energyCalculator, sqft: e.target.value})}
+                        className="w-full px-3 py-2 border rounded-lg text-sm"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Current electric bill ($)"
+                        value={energyCalculator.currentBill}
+                        onChange={(e) => setEnergyCalculator({...energyCalculator, currentBill: e.target.value})}
+                        className="w-full px-3 py-2 border rounded-lg text-sm"
+                      />
+                      <button 
+                        onClick={calculateSavings}
+                        className="w-full bg-green-500 text-white py-2 rounded-lg font-semibold text-sm"
+                      >
+                        Calculate Savings
+                      </button>
+                      {energyCalculator.savings && (
+                        <div className="bg-white rounded-lg p-3 text-center">
+                          <p className="text-2xl font-bold text-green-600">
+                            ${energyCalculator.savings.monthly}/mo
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            ${energyCalculator.savings.yearly} yearly savings
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Quick Form */}
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Your name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border rounded-xl text-sm"
+                    />
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="Phone number"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border rounded-xl text-sm"
+                    />
+                    <select
+                      name="serviceType"
+                      value={formData.serviceType}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border rounded-xl text-sm"
+                    >
+                      <option value="">Select service</option>
+                      <option value="spray-foam">Spray Foam</option>
+                      <option value="blown-in">Blown-In</option>
+                      <option value="attic">Attic Insulation</option>
+                      <option value="audit">Energy Audit</option>
+                    </select>
+                    
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl font-bold shadow-lg"
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                      ) : (
+                        'Get Free Quote Now'
+                      )}
+                    </button>
+                  </form>
+                  
+                  {/* Trust Badges */}
+                  <div className="mt-6 flex justify-center gap-4">
+                    <div className="text-center">
+                      <Shield className="h-8 w-8 text-green-500 mx-auto mb-1" />
+                      <p className="text-xs text-gray-600">Licensed</p>
+                    </div>
+                    <div className="text-center">
+                      <Star className="h-8 w-8 text-yellow-500 mx-auto mb-1" />
+                      <p className="text-xs text-gray-600">4.9 Rating</p>
+                    </div>
+                    <div className="text-center">
+                      <Clock className="h-8 w-8 text-blue-500 mx-auto mb-1" />
+                      <p className="text-xs text-gray-600">Same Day</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Mobile Bottom Navigation */}
           <div className="mobile-tab-bar">
             <div 

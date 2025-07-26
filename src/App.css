@@ -177,7 +177,7 @@ body {
 @media (max-width: 768px) {
   .hero-modern {
     min-height: auto;
-    padding: 5.5rem 0 3rem 0; /* Adjusted for thinner mobile header */
+    padding: 2rem 0 3rem 0; /* Reduced top padding since we use margin-top */
   }
 }
 
@@ -518,6 +518,17 @@ section[id] {
   scroll-margin-top: 110px;
 }
 
+/* Mobile specific scroll margins */
+@media (max-width: 768px) {
+  section[id] {
+    scroll-margin-top: 120px;
+  }
+  
+  #services {
+    scroll-margin-top: 130px;
+  }
+}
+
 /* Section fade-in animation when scrolling */
 section {
   animation: sectionFadeIn 0.8s ease-out;
@@ -791,6 +802,7 @@ html, body {
   header h1 {
     font-size: 1rem !important;
     font-weight: 700 !important;
+    line-height: 1.2 !important;
   }
 
   header p {
@@ -1867,3 +1879,126 @@ html, body {
     background: rgba(255, 255, 255, 0.9);
   }
 }
+
+/* Innovative Mobile Animations & Styles */
+@keyframes gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+/* Bottom Sheet Styles */
+.bottom-sheet-enter {
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+}
+
+.bottom-sheet-enter-active {
+  transform: translateY(0);
+}
+
+/* Story Mode Styles */
+.story-progress {
+  transition: width 5s linear;
+}
+
+/* FAB Animations */
+@keyframes fab-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 4px 20px rgba(251, 146, 60, 0.4);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 6px 30px rgba(251, 146, 60, 0.6);
+  }
+}
+
+.fab-main {
+  animation: fab-pulse 2s ease-in-out infinite;
+}
+
+/* Heat Wave Effect */
+@keyframes heat-wave {
+  0%, 100% { 
+    opacity: 0.2;
+    transform: scale(1) translateY(0);
+  }
+  50% { 
+    opacity: 0.4;
+    transform: scale(1.1) translateY(-10px);
+  }
+}
+
+.heat-wave {
+  animation: heat-wave 4s ease-in-out infinite;
+}
+
+/* Pull to Refresh */
+.pull-indicator {
+  transition: all 0.3s ease;
+}
+
+/* Mobile Glass Card Enhanced */
+.mobile-glass-card-enhanced {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Energy Calculator Animation */
+@keyframes energy-flow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.energy-flow {
+  position: relative;
+  overflow: hidden;
+}
+
+.energy-flow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.4), transparent);
+  animation: energy-flow 2s linear infinite;
+}
+
+/* Haptic Feedback Visual */
+.haptic-tap {
+  position: relative;
+}
+
+.haptic-tap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  animation: haptic-ripple 0.4s ease-out;
+}
+
+@keyframes haptic-ripple {
+  to {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* Z-index hierarchy for mobile */
+.z-60 { z-index: 60; }
