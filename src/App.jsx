@@ -2452,67 +2452,6 @@ function App() {
         </>
       )}
 
-      {/* Google Maps Section */}
-      <section className="py-16 bg-gray-100">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-8">
-            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Serving All of Rio Grande Valley
-            </h3>
-            <p className="text-lg text-gray-600">
-              From McAllen to Brownsville, we're your local insulation experts
-            </p>
-          </div>
-          
-          <div className="max-w-6xl mx-auto rounded-xl overflow-hidden shadow-2xl">
-            <div className="relative bg-gray-100" style={{ height: '450px' }}>
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d458795.5488585585!2d-98.1628!3d26.1685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1"
-                width="100%"
-                height="450"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Rio Grande Valley Service Area Map"
-                className="relative z-10"
-              />
-              {/* Fallback image for when iframe is blocked */}
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-gray-100 to-gray-200">
-                <div className="text-center p-8">
-                  <MapPin className="h-16 w-16 text-orange-500 mx-auto mb-4" />
-                  <h4 className="text-2xl font-bold text-gray-800 mb-2">Rio Grande Valley Service Area</h4>
-                  <p className="text-gray-600 mb-6">We serve all cities within 50 miles of McAllen</p>
-                  <div className="text-gray-700 mb-6">
-                    <p className="font-semibold mb-2">Including:</p>
-                    <p>McAllen • Edinburg • Brownsville • Harlingen • Mission • Pharr</p>
-                  </div>
-                  <Button 
-                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white"
-                    onClick={() => window.open('https://maps.google.com/?q=Rio+Grande+Valley+TX', '_blank')}
-                  >
-                    Open in Google Maps →
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-8 text-center">
-            <p className="text-gray-600 mb-4">
-              <MapPin className="inline h-5 w-5 text-orange-600 mr-2" />
-              Headquarters in McAllen • Serving all RGV cities within 50 miles
-            </p>
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
-              onClick={() => window.open('https://maps.google.com/?q=RGV+Insulation+Experts+McAllen+TX', '_blank')}
-            >
-              Get Directions →
-            </Button>
-          </div>
-        </div>
-      </section>
 
       {/* Blog/Resources Section */}
       <section className="py-16 bg-white">
