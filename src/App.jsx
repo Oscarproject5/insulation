@@ -156,11 +156,6 @@ const BlueprintHouse = React.memo(() => (
 ));
 
 function App() {
-  // Memoized calculations
-  const temperatureBarWidth = useMemo(() => 
-    `${Math.min(headerState?.currentTemp || 89, 100)}%`, 
-    [headerState?.currentTemp]
-  );
   // Load saved form data from localStorage
   const loadSavedFormData = () => {
     const saved = localStorage.getItem('rgv_form_data');
@@ -204,6 +199,12 @@ function App() {
     todaysHigh: 89,
     isNight: false
   })
+
+  // Memoized calculations
+  const temperatureBarWidth = useMemo(() => 
+    `${Math.min(headerState?.currentTemp || 89, 100)}%`, 
+    [headerState?.currentTemp]
+  )
 
   // Mobile-specific state
   const [isMobile, setIsMobile] = useState(false)
@@ -898,6 +899,7 @@ function App() {
     </>
   )
 
+  // Main App return
   return (
     <div className={`min-h-screen bg-white ${isMobile ? 'pb-16' : ''}`}>
       {/* Modals */}
