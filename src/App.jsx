@@ -810,7 +810,13 @@ function App() {
                       <Phone className="mr-2 h-4 w-4" />
                       Call or Text (956) 854-0899
                     </Button>
-                    <Button size="lg" className="btn-outline mobile-touch px-7 py-4 text-lg font-bold">
+                    <Button 
+                      size="lg" 
+                      className="btn-outline mobile-touch px-7 py-4 text-lg font-bold"
+                      onClick={() => {
+                        document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
+                      }}
+                    >
                       Learn More →
                     </Button>
                   </div>
