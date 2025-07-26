@@ -217,10 +217,10 @@ function App() {
   const swipeRef = useRef(null)
   
   // Innovative mobile states
-  const [showBottomSheet, setShowBottomSheet] = useState(false)
+  // Removed showBottomSheet - now scrolling to form instead
   const [showStoryMode, setShowStoryMode] = useState(false)
   const [currentStory, setCurrentStory] = useState(0)
-  const [energyCalculator, setEnergyCalculator] = useState({ sqft: '', currentBill: '', savings: null })
+  // Removed energy calculator - simplified to main form
   const [pullProgress, setPullProgress] = useState(0)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [hapticEnabled, setHapticEnabled] = useState(true)
@@ -604,16 +604,7 @@ function App() {
     }
   }
   
-  // Calculate energy savings
-  const calculateSavings = () => {
-    const { sqft, currentBill } = energyCalculator
-    if (sqft && currentBill) {
-      const avgSavings = 0.35 // 35% average savings
-      const monthlySavings = Math.round(currentBill * avgSavings)
-      const yearlySavings = monthlySavings * 12
-      setEnergyCalculator({ ...energyCalculator, savings: { monthly: monthlySavings, yearly: yearlySavings } })
-    }
-  }
+  // Removed calculateSavings - using main form instead
   
   // Story navigation
   const nextStory = () => {
@@ -653,9 +644,12 @@ function App() {
     if (isRightSwipe) handleSwipe('right')
   }, [touchStart, touchEnd])
 
-  // Memoized callback for showing bottom sheet
-  const handleShowBottomSheet = useCallback(() => {
-    setShowBottomSheet(true)
+  // Memoized callback for scrolling to quote form
+  const handleShowQuoteForm = useCallback(() => {
+    const quoteSection = document.getElementById('quote')
+    if (quoteSection) {
+      quoteSection.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [])
 
   const handleMobileFormStep = (step) => {
@@ -1101,7 +1095,7 @@ function App() {
                     <Button 
                       size="lg" 
                       className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 text-base shadow-xl mobile-hero-button"
-                      onClick={handleShowBottomSheet}
+                      onClick={handleShowQuoteForm}
                     >
                       Get Free Quote →
                     </Button>
@@ -2270,7 +2264,7 @@ function App() {
                 
                 <button 
                   className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-8 py-3 rounded-full font-bold"
-                  onClick={(e) => { e.stopPropagation(); setShowStoryMode(false); setShowBottomSheet(true); }}
+                  onClick={(e) => { e.stopPropagation(); setShowStoryMode(false); handleShowQuoteForm(); }}
                 >
                   Get Free Quote
                 </button>
@@ -2279,129 +2273,6 @@ function App() {
           )}
 
 
-          {/* Bottom Sheet Lead Form */}
-          {showBottomSheet && (
-            <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setShowBottomSheet(false)}>
-              <div 
-                className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl transition-transform"
-                onClick={(e) => e.stopPropagation()}
-                style={{ maxHeight: '90vh', overflowY: 'auto' }}
-              >
-                {/* Handle Bar */}
-                <div className="sticky top-0 bg-white pt-4 pb-2">
-                  <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-center mb-2">Get Your Free Quote</h3>
-                  <p className="text-sm text-gray-600 text-center mb-4">Takes only 30 seconds</p>
-                </div>
-                
-                <div className="px-6 pb-8">
-                  {/* Energy Calculator */}
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-4 mb-6">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-yellow-500" />
-                      Calculate Your Savings
-                    </h4>
-                    <div className="space-y-3">
-                      <input
-                        type="number"
-                        placeholder="Home size (sq ft)"
-                        value={energyCalculator.sqft}
-                        onChange={(e) => setEnergyCalculator({...energyCalculator, sqft: e.target.value})}
-                        className="w-full px-3 py-2 border rounded-lg text-sm"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Current electric bill ($)"
-                        value={energyCalculator.currentBill}
-                        onChange={(e) => setEnergyCalculator({...energyCalculator, currentBill: e.target.value})}
-                        className="w-full px-3 py-2 border rounded-lg text-sm"
-                      />
-                      <button 
-                        onClick={calculateSavings}
-                        className="w-full bg-green-500 text-white py-2 rounded-lg font-semibold text-sm"
-                      >
-                        Calculate Savings
-                      </button>
-                      {energyCalculator.savings && (
-                        <div className="bg-white rounded-lg p-3 text-center">
-                          <p className="text-2xl font-bold text-green-600">
-                            ${energyCalculator.savings.monthly}/mo
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            ${energyCalculator.savings.yearly} yearly savings
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Quick Form */}
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Your name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      autoComplete="name"
-                      required
-                      className="w-full px-4 py-3 border rounded-xl text-sm"
-                    />
-                    <input
-                      type="tel"
-                      name="phone"
-                      placeholder="Phone number"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      autoComplete="tel"
-                      required
-                      className="w-full px-4 py-3 border rounded-xl text-sm"
-                    />
-                    <select
-                      name="serviceType"
-                      value={formData.serviceType}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border rounded-xl text-sm"
-                    >
-                      <option value="">Select service</option>
-                      <option value="spray-foam">Spray Foam</option>
-                      <option value="blown-in">Blown-In</option>
-                      <option value="attic">Attic Insulation</option>
-                      <option value="audit">Energy Audit</option>
-                    </select>
-                    
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl font-bold shadow-lg"
-                    >
-                      {isSubmitting ? (
-                        <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-                      ) : (
-                        'Get Free Quote Now'
-                      )}
-                    </button>
-                  </form>
-                  
-                  {/* Trust Badges */}
-                  <div className="mt-6 flex justify-center gap-4">
-                    <div className="text-center">
-                      <Shield className="h-8 w-8 text-green-500 mx-auto mb-1" />
-                      <p className="text-xs text-gray-600">Licensed</p>
-                    </div>
-                    <div className="text-center">
-                      <Star className="h-8 w-8 text-yellow-500 mx-auto mb-1" />
-                      <p className="text-xs text-gray-600">4.9 Rating</p>
-                    </div>
-                    <div className="text-center">
-                      <Clock className="h-8 w-8 text-blue-500 mx-auto mb-1" />
-                      <p className="text-xs text-gray-600">Same Day</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Mobile Bottom Navigation */}
           <div className="mobile-tab-bar">
