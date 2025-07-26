@@ -779,6 +779,29 @@ html, body {
     --mobile-shadow-medium: 0 2px 8px rgba(0,0,0,0.08);
     --mobile-border-ultra: 0.5px solid rgba(0,0,0,0.05);
   }
+  
+  /* Ensure form inputs fit on all mobile screens */
+  input[type="text"],
+  input[type="tel"],
+  input[type="email"],
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    min-height: 44px !important; /* Apple's recommended touch target */
+    width: 100% !important;
+  }
+  
+  /* Adjust form container for small screens */
+  #quote .shadow-xl {
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 0.5rem;
+  }
+  
+  /* Ensure form steps fit on small screens */
+  .mobile-form-step {
+    padding: 0;
+  }
 
   /* Mobile Typography */
   body {

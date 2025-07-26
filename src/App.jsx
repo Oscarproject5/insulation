@@ -809,7 +809,7 @@ function App() {
                 <p>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
                 
                 <h3 className="text-lg font-bold mt-6">Contact Us</h3>
-                <p>If you have any questions about this Privacy Policy, please contact us at (956) 854-0899 or info@rgvinsulation.com.</p>
+                <p>If you have any questions about this Privacy Policy, please contact us at (956) 854-0899 or info@valleyinsulationpros.com.</p>
               </div>
             </div>
           </div>
@@ -844,7 +844,7 @@ function App() {
                 <p className="text-gray-600">Last updated: January 26, 2024</p>
                 
                 <h3 className="text-lg font-bold mt-6">Service Agreement</h3>
-                <p>By requesting our services, you agree to these terms. RGV Insulation Experts provides professional insulation installation services throughout the Rio Grande Valley.</p>
+                <p>By requesting our services, you agree to these terms. Valley Insulation Pros provides professional insulation installation services throughout the Rio Grande Valley.</p>
                 
                 <h3 className="text-lg font-bold mt-6">Service Warranty</h3>
                 <p>We provide a lifetime warranty on spray foam insulation installations and manufacturer warranties on all materials used. Warranty is valid for original purchaser only.</p>
@@ -859,7 +859,7 @@ function App() {
                 <p>You may cancel scheduled services up to 24 hours before the appointment without penalty. Same-day cancellations may incur a service fee.</p>
                 
                 <h3 className="text-lg font-bold mt-6">Contact Information</h3>
-                <p>For questions about these terms, contact us at (956) 854-0899 or info@rgvinsulation.com.</p>
+                <p>For questions about these terms, contact us at (956) 854-0899 or info@valleyinsulationpros.com.</p>
               </div>
             </div>
           </div>
@@ -928,7 +928,7 @@ function App() {
               )}
               {!isMobile && (
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">RGV Insulation Experts</h1>
+                  <h1 className="text-lg font-bold text-gray-900">Valley Insulation Pros</h1>
                   <div className="flex items-center gap-2 text-xs text-gray-600">
                     <span>Licensed & Insured</span>
                     <span className="text-xs">•</span>
@@ -945,7 +945,7 @@ function App() {
               )}
               {isMobile && (
                 <div>
-                  <h1 className="text-base font-bold text-gray-900">RGV Insulation<br/>Experts</h1>
+                  <h1 className="text-base font-bold text-gray-900">Valley Insulation<br/>Pros</h1>
                   <div className="flex items-center gap-1 text-xs text-gray-600">
                     <span>Licensed &</span>
                     <br className="hidden" />
@@ -1821,7 +1821,7 @@ function App() {
 
       {/* Lead Generation Form */}
       <section id="quote" className="py-16 bg-gradient-to-b from-gray-50 to-white">
-        <div className="container mx-auto px-4 lg:px-8">
+        <div className="container mx-auto px-2 sm:px-4 lg:px-8">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-10">
               <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
@@ -1833,14 +1833,14 @@ function App() {
               </p>
             </div>
 
-            <Card className="shadow-xl border-0 overflow-hidden">
+            <Card className="shadow-xl border-0 overflow-hidden mx-2 sm:mx-0">
               <CardHeader className="bg-gradient-to-r from-gray-900 to-gray-800 text-white text-center py-8">
                 <CardTitle className="text-2xl lg:text-3xl font-bold">Free In-Home Consultation</CardTitle>
                 <CardDescription className="text-gray-300 text-base mt-2">
                   Usually $150 value - FREE for a limited time
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-8 bg-white">
+              <CardContent className="p-4 sm:p-6 lg:p-8 bg-white">
                 {isMobile ? (
                   <form name="quote-form-mobile" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" onSubmit={handleSubmit} className="space-y-5">
                     <input type="hidden" name="form-name" value="quote-form-mobile" />
@@ -2582,7 +2582,7 @@ function App() {
                   <Shield className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold">RGV Insulation Experts</h4>
+                  <h4 className="text-lg font-bold">Valley Insulation Pros</h4>
                 </div>
               </div>
               <p className="text-sm text-gray-400 mb-4">
@@ -2660,7 +2660,7 @@ function App() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span>info@rgvinsulation.com</span>
+                  <span>info@valleyinsulationpros.com</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <MapPin className="h-4 w-4" />
@@ -2675,7 +2675,7 @@ function App() {
           </div>
 
           <div className="border-t border-gray-800 mt-6 pt-6 text-center text-xs text-gray-400">
-            <p>&copy; 2024 RGV Insulation Experts. All rights reserved. Licensed & Insured in Texas.</p>
+            <p>&copy; 2024 Valley Insulation Pros. All rights reserved. Licensed & Insured in Texas.</p>
             <p className="mt-1">Emergency service • Free estimates • Lifetime warranty</p>
             <div className="mt-3 space-x-4">
               <button 
