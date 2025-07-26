@@ -787,15 +787,8 @@ html, body {
   textarea,
   select {
     font-size: 16px !important; /* Prevents zoom on iOS */
-    min-height: 38px !important; /* Smaller touch target for compact design */
+    min-height: 44px !important; /* Apple's recommended touch target */
     width: 100% !important;
-    padding: 0.5rem !important; /* Reduce padding */
-  }
-  
-  /* Compact button sizes on mobile */
-  button {
-    padding: 0.5rem 1rem !important;
-    font-size: 0.875rem !important;
   }
   
   /* Adjust form container for small screens */
@@ -1566,8 +1559,8 @@ html, body {
 
   .mobile-form-progress {
     display: flex;
-    gap: 6px;
-    margin-bottom: 1rem;
+    gap: 8px;
+    margin-bottom: 2rem;
   }
 
   .mobile-form-progress-item {
