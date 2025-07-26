@@ -1009,21 +1009,28 @@ function App() {
         
         <div className="container mx-auto px-4 lg:px-8 py-11 lg:py-15 relative z-10 w-full">
           <div className="grid lg:grid-cols-2 gap-10 items-center h-full">
-            <div className="space-y-6 fade-up mobile-animate max-w-4xl">
+            <div className="space-y-6 fade-up mobile-animate max-w-4xl" style={isMobile ? { contain: 'layout style paint' } : {}}>
               {isMobile ? (
                 <>
                   {/* Mobile-specific hero content */}
-                  <div className="relative">
-                    {/* Animated heat wave effect */}
-                    <div className="absolute -top-8 -left-8 -right-8 h-40 bg-gradient-to-b from-red-500/20 via-orange-500/10 to-transparent rounded-full blur-2xl animate-pulse" />
+                  <div className="relative" style={{ contain: 'layout style' }}>
+                    {/* Animated heat wave effect - optimized with transform */}
+                    <div 
+                      className="absolute -top-8 -left-8 -right-8 h-40 rounded-full"
+                      style={{
+                        background: 'radial-gradient(ellipse at center, rgba(239,68,68,0.2) 0%, rgba(251,146,60,0.1) 50%, transparent 100%)',
+                        filter: 'blur(40px)',
+                        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        willChange: 'opacity',
+                        transform: 'translateZ(0)'
+                      }}
+                    />
                     
                     <div className="relative z-10">
                       {/* Simplified temperature badge */}
                       <div className="inline-flex items-center gap-2 bg-red-500/90 text-white px-3 py-1 rounded-full mb-4 text-xs font-medium">
                         <Thermometer className="h-3 w-3" />
-                        <span>
-                          Current Temp: {headerState.currentTemp}°F
-                        </span>
+                        <span>Current Temp: {headerState.currentTemp}°F</span>
                       </div>
                       
                       {/* Simplified headline */}
@@ -1037,15 +1044,24 @@ function App() {
                       {/* Value proposition */}
                       <div className="text-center mb-4">
                         <p className="text-lg text-gray-700 font-medium">Cut your cooling costs by up to</p>
-                        <div className="relative inline-block my-2">
-                          <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">35%</span>
-                          <div className="absolute -inset-1 bg-gradient-to-r from-green-600 to-emerald-600 opacity-20 blur-xl rounded-full"></div>
+                        <div className="relative inline-block my-2" style={{ isolation: 'isolate' }}>
+                          <span className="text-6xl font-black mobile-hero-gradient-text">35%</span>
+                          <div 
+                            className="absolute -inset-1 rounded-full"
+                            style={{
+                              background: 'linear-gradient(to right, #16a34a, #10b981)',
+                              opacity: 0.2,
+                              filter: 'blur(20px)',
+                              transform: 'translateZ(0)',
+                              zIndex: -1
+                            }}
+                          />
                         </div>
                         <p className="text-sm text-gray-600 mt-1">With proper insulation</p>
                       </div>
                       
                       {/* Streamlined metrics card */}
-                      <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
+                      <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100" style={{ contain: 'layout' }}>
                         {/* Simple heat indicator */}
                         <div className="mb-4">
                           <div className="flex items-center justify-between mb-2">
@@ -1053,23 +1069,27 @@ function App() {
                           </div>
                           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                             <div 
-                              className="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full"
-                              style={{ width: `${Math.min((headerState.currentTemp / 100) * 100, 100)}%` }}
+                              className="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-300"
+                              style={{ 
+                                width: `${Math.min(headerState.currentTemp, 100)}%`,
+                                transform: 'translateZ(0)',
+                                willChange: 'width'
+                              }}
                             />
                           </div>
                         </div>
                         
                         {/* Three key metrics */}
                         <div className="grid grid-cols-3 gap-2 text-center">
-                          <div className="bg-red-50 rounded-lg py-3 px-2">
+                          <div className="bg-red-50 rounded-lg py-3 px-2 mobile-hero-metrics">
                             <p className="text-xl font-bold text-red-600">35%</p>
                             <p className="text-xs text-gray-600">Energy Lost</p>
                           </div>
-                          <div className="bg-orange-50 rounded-lg py-3 px-2">
+                          <div className="bg-orange-50 rounded-lg py-3 px-2 mobile-hero-metrics">
                             <p className="text-xl font-bold text-orange-600">3x</p>
                             <p className="text-xs text-gray-600">AC Works</p>
                           </div>
-                          <div className="bg-green-50 rounded-lg py-3 px-2">
+                          <div className="bg-green-50 rounded-lg py-3 px-2 mobile-hero-metrics">
                             <p className="text-xl font-bold text-green-600">$189</p>
                             <p className="text-xs text-gray-600">Save/Mo</p>
                           </div>
@@ -1081,7 +1101,7 @@ function App() {
                   <div className="mt-6 space-y-3">
                     <Button 
                       size="lg" 
-                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 text-lg shadow-xl"
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 text-lg shadow-xl mobile-hero-button"
                       onClick={() => setShowBottomSheet(true)}
                     >
                       Get Free Quote →

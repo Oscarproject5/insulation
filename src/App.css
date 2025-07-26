@@ -1117,6 +1117,8 @@ html, body {
 
   .mobile-animate {
     animation: mobileSlideUp 0.5s ease-out;
+    will-change: transform, opacity;
+    contain: layout style paint;
   }
 
   /* Mobile Swipe Hint */
@@ -1625,6 +1627,24 @@ html, body {
     transform: translate(-50%, -50%);
     font-size: 20px;
     color: #FF6B35;
+  }
+
+  /* Mobile Hero Optimizations */
+  .mobile-hero-gradient-text {
+    background: linear-gradient(to right, #16a34a, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .mobile-hero-button {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .mobile-hero-metrics {
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   /* Mobile Micro-Animations */
