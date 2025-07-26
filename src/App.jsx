@@ -1820,23 +1820,22 @@ function App() {
       </section>
 
       {/* Lead Generation Form */}
-      <section id="quote" className="py-16 bg-gradient-to-b from-gray-50 to-white">
+      <section id="quote" className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-2 sm:px-4 lg:px-8">
           <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
-              <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+            <div className="text-center mb-6 sm:mb-8 lg:mb-10">
+              <h3 className="text-xl sm:text-2xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
                 Get Your FREE Estimate Today
               </h3>
-              <p className="text-lg text-gray-600">
-                Join hundreds of Valley families saving money on energy bills. 
-                No obligation, no pressure - just honest advice from local experts.
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600 px-4 sm:px-0">
+                Join hundreds of Valley families saving money on energy bills.
               </p>
             </div>
 
             <Card className="shadow-xl border-0 overflow-hidden mx-2 sm:mx-0">
-              <CardHeader className="bg-gradient-to-r from-gray-900 to-gray-800 text-white text-center py-8">
-                <CardTitle className="text-2xl lg:text-3xl font-bold">Free In-Home Consultation</CardTitle>
-                <CardDescription className="text-gray-300 text-base mt-2">
+              <CardHeader className="bg-gradient-to-r from-gray-900 to-gray-800 text-white text-center py-4 sm:py-6 lg:py-8">
+                <CardTitle className="text-lg sm:text-xl lg:text-3xl font-bold">Free In-Home Consultation</CardTitle>
+                <CardDescription className="text-gray-300 text-xs sm:text-sm lg:text-base mt-1 sm:mt-2">
                   Usually $150 value - FREE for a limited time
                 </CardDescription>
               </CardHeader>
@@ -1854,8 +1853,8 @@ function App() {
                     
                     {formStep === 1 && (
                       <div className="mobile-form-step">
-                        <h4 className="text-lg font-bold mb-4">Step 1: Your Information</h4>
-                        <div className="space-y-4">
+                        <h4 className="text-base font-bold mb-2">Step 1: Your Information</h4>
+                        <div className="space-y-3">
                           <div>
                             <Input
                               type="text"
@@ -1897,8 +1896,8 @@ function App() {
                     
                     {formStep === 2 && (
                       <div className="mobile-form-step">
-                        <h4 className="text-lg font-bold mb-4">Step 2: Service Details</h4>
-                        <div className="space-y-4">
+                        <h4 className="text-base font-bold mb-2">Step 2: Service Details</h4>
+                        <div className="space-y-3">
                           <select
                             name="serviceType"
                             value={formData.serviceType}
@@ -1941,8 +1940,8 @@ function App() {
                     
                     {formStep === 3 && (
                       <div className="mobile-form-step">
-                        <h4 className="text-lg font-bold mb-4">Step 3: Additional Info</h4>
-                        <div className="space-y-4">
+                        <h4 className="text-base font-bold mb-2">Step 3: Additional Info</h4>
+                        <div className="space-y-3">
                           <Textarea
                             name="message"
                             value={formData.message}
