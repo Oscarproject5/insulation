@@ -1644,6 +1644,20 @@ html, body {
     background-clip: text;
   }
 
+  .mobile-heat-wave {
+    background: radial-gradient(ellipse at center, rgba(239,68,68,0.15) 0%, transparent 70%);
+    filter: blur(20px);
+    transform: translateZ(0);
+  }
+
+  .mobile-hero-glow {
+    background: linear-gradient(to right, #16a34a, #10b981);
+    opacity: 0.15;
+    filter: blur(15px);
+    transform: translateZ(0);
+    z-index: -1;
+  }
+
   /* Ensure hero fits in viewport */
   @media (max-height: 700px) {
     .hero-modern {
@@ -1669,6 +1683,18 @@ html, body {
   .mobile-hero-metrics {
     transform: translateZ(0);
     backface-visibility: hidden;
+  }
+
+  .mobile-contain-layout-style {
+    contain: layout style;
+  }
+
+  .mobile-contain-layout-style-paint {
+    contain: layout style paint;
+  }
+
+  .mobile-contain-layout {
+    contain: layout;
   }
 
   /* Mobile Micro-Animations */

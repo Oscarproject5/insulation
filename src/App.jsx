@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Input } from '@/components/ui/input.jsx'
@@ -15,7 +15,152 @@ import blownInsulationNewImage from './assets/blown-insulation-new.jpg'
 import atticInsulationNewImage from './assets/attic-insulation-new.jpg'
 import professionalTeamSprayImage from './assets/professional-team-spray.jpg'
 
+// Memoized Blueprint House Component
+const BlueprintHouse = React.memo(() => (
+  <div className="blueprint-house">
+    <svg viewBox="0 0 600 450" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      {/* House Outline */}
+      <g stroke="#334155" strokeWidth="2.5" fill="none" opacity="0.7">
+        {/* Roof */}
+        <path d="M 100 200 L 300 50 L 500 200" />
+        <line x1="100" y1="200" x2="100" y2="220" />
+        <line x1="500" y1="200" x2="500" y2="220" />
+        
+        {/* Walls */}
+        <rect x="100" y="220" width="400" height="180" />
+        
+        {/* Foundation */}
+        <rect x="90" y="400" width="420" height="30" fill="#cbd5e1" opacity="0.4" />
+        
+        {/* Insulation Layer */}
+        <rect x="110" y="230" width="380" height="160" strokeDasharray="5,5" stroke="#10B981" strokeWidth="4" opacity="0.8">
+          <animate attributeName="opacity" values="0.6;1;0.6" dur="4s" repeatCount="indefinite" />
+        </rect>
+        
+        {/* Windows */}
+        <rect x="150" y="270" width="60" height="80" />
+        <rect x="390" y="270" width="60" height="80" />
+        
+        {/* Door */}
+        <rect x="270" y="310" width="60" height="90" />
+        
+        {/* Attic insulation */}
+        <path d="M 120 195 L 300 60 L 482 195" strokeDasharray="5,5" stroke="#10B981" strokeWidth="3" opacity="0.8" />
+      </g>
+      
+      {/* Heat arrows outside */}
+      <g fill="none">
+        {/* Left side heat arrows */}
+        <g stroke="#ff4500" strokeWidth="3" fill="#ff4500">
+          <line x1="20" y1="150" x2="85" y2="150">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" />
+          </line>
+          <polygon points="80,143 92,150 80,157">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" />
+          </polygon>
+          
+          <line x1="20" y1="280" x2="85" y2="280">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="0.8s" />
+          </line>
+          <polygon points="80,273 92,280 80,287">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="0.8s" />
+          </polygon>
+          
+          <line x1="20" y1="350" x2="85" y2="350">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="1.6s" />
+          </line>
+          <polygon points="80,343 92,350 80,357">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="1.6s" />
+          </polygon>
+        </g>
+        
+        {/* Right side heat arrows */}
+        <g stroke="#ff4500" strokeWidth="3" fill="#ff4500">
+          <line x1="580" y1="150" x2="515" y2="150">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="0.4s" />
+          </line>
+          <polygon points="520,143 508,150 520,157">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="0.4s" />
+          </polygon>
+          
+          <line x1="580" y1="280" x2="515" y2="280">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="1.2s" />
+          </line>
+          <polygon points="520,273 508,280 520,287">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="1.2s" />
+          </polygon>
+          
+          <line x1="580" y1="350" x2="515" y2="350">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="2s" />
+          </line>
+          <polygon points="520,343 508,350 520,357">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="2s" />
+          </polygon>
+        </g>
+        
+        {/* Heat wave lines */}
+        <g stroke="#ff4500" strokeWidth="2" opacity="0.8">
+          <path d="M 10 130 Q 20 120, 30 130 T 50 130">
+            <animate attributeName="d" 
+              values="M 10 130 Q 20 120, 30 130 T 50 130;M 10 130 Q 20 140, 30 130 T 50 130;M 10 130 Q 20 120, 30 130 T 50 130" 
+              dur="2s" repeatCount="indefinite" />
+          </path>
+          <path d="M 10 170 Q 20 180, 30 170 T 50 170">
+            <animate attributeName="d" 
+              values="M 10 170 Q 20 180, 30 170 T 50 170;M 10 170 Q 20 160, 30 170 T 50 170;M 10 170 Q 20 180, 30 170 T 50 170" 
+              dur="2s" repeatCount="indefinite" begin="0.5s" />
+          </path>
+          <path d="M 10 300 Q 20 290, 30 300 T 50 300">
+            <animate attributeName="d" 
+              values="M 10 300 Q 20 290, 30 300 T 50 300;M 10 300 Q 20 310, 30 300 T 50 300;M 10 300 Q 20 290, 30 300 T 50 300" 
+              dur="2s" repeatCount="indefinite" begin="1s" />
+          </path>
+          
+          <path d="M 550 130 Q 560 120, 570 130 T 590 130">
+            <animate attributeName="d" 
+              values="M 550 130 Q 560 120, 570 130 T 590 130;M 550 130 Q 560 140, 570 130 T 590 130;M 550 130 Q 560 120, 570 130 T 590 130" 
+              dur="2s" repeatCount="indefinite" begin="0.3s" />
+          </path>
+          <path d="M 550 170 Q 560 180, 570 170 T 590 170">
+            <animate attributeName="d" 
+              values="M 550 170 Q 560 180, 570 170 T 590 170;M 550 170 Q 560 160, 570 170 T 590 170;M 550 170 Q 560 180, 570 170 T 590 170" 
+              dur="2s" repeatCount="indefinite" begin="0.8s" />
+          </path>
+          <path d="M 550 300 Q 560 290, 570 300 T 590 300">
+            <animate attributeName="d" 
+              values="M 550 300 Q 560 290, 570 300 T 590 300;M 550 300 Q 560 310, 570 300 T 590 300;M 550 300 Q 560 290, 570 300 T 590 300" 
+              dur="2s" repeatCount="indefinite" begin="1.3s" />
+          </path>
+        </g>
+      </g>
+      
+      {/* Cool air inside */}
+      <g fill="#10B981" opacity="0.5">
+        <circle cx="300" cy="300" r="3">
+          <animate attributeName="cy" values="300;280;300" dur="3s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="200" cy="320" r="3">
+          <animate attributeName="cy" values="320;300;320" dur="3.5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="400" cy="310" r="3">
+          <animate attributeName="cy" values="310;290;310" dur="4s" repeatCount="indefinite" />
+        </circle>
+      </g>
+      
+      {/* Text labels */}
+      <text x="300" y="130" textAnchor="middle" fill="#475569" fontSize="16" fontWeight="600" opacity="0.8">Insulated Attic</text>
+      <text x="40" y="140" fill="#ff6b35" fontSize="14" fontWeight="600" opacity="0.8">Hot Air</text>
+      <text x="300" y="350" textAnchor="middle" fill="#10B981" fontSize="14" fontWeight="600" opacity="0.8">Cool Interior</text>
+    </svg>
+  </div>
+));
+
 function App() {
+  // Memoized calculations
+  const temperatureBarWidth = useMemo(() => 
+    `${Math.min(headerState?.currentTemp || 89, 100)}%`, 
+    [headerState?.currentTemp]
+  );
   // Load saved form data from localStorage
   const loadSavedFormData = () => {
     const saved = localStorage.getItem('rgv_form_data');
@@ -347,7 +492,7 @@ function App() {
     return Object.keys(errors).length === 0
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault()
     
     // Check rate limiting
@@ -432,7 +577,7 @@ function App() {
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [formData, formStartTime, validateForm])
 
   // Mobile-specific handlers
   const handleTabClick = (tab) => {
@@ -489,23 +634,23 @@ function App() {
     }
   }
 
-  const onTouchStart = (e) => {
+  const onTouchStart = useCallback((e) => {
     setTouchEnd(null)
     setTouchStart(e.targetTouches[0].clientX)
-  }
+  }, [])
 
-  const onTouchMove = (e) => {
+  const onTouchMove = useCallback((e) => {
     setTouchEnd(e.targetTouches[0].clientX)
-  }
+  }, [])
 
-  const onTouchEnd = () => {
+  const onTouchEnd = useCallback(() => {
     if (!touchStart || !touchEnd) return
     const distance = touchStart - touchEnd
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
     if (isLeftSwipe) handleSwipe('left')
     if (isRightSwipe) handleSwipe('right')
-  }
+  }, [touchStart, touchEnd])
 
   const handleMobileFormStep = (step) => {
     // Validate current step before moving forward
@@ -580,13 +725,13 @@ function App() {
       }
     ]
     
-    const toggleItem = (id) => {
+    const toggleItem = useCallback((id) => {
       setOpenItems(prev => 
         prev.includes(id) 
           ? prev.filter(item => item !== id)
           : [...prev, id]
       )
-    }
+    }, [])
     
     return (
       <div className="space-y-4">
@@ -844,142 +989,7 @@ function App() {
         )}
         
         {/* Blueprint House Background */}
-        <div className="blueprint-house">
-          <svg viewBox="0 0 600 450" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            {/* House Outline */}
-            <g stroke="#334155" strokeWidth="2.5" fill="none" opacity="0.7">
-              {/* Roof */}
-              <path d="M 100 200 L 300 50 L 500 200" />
-              <line x1="100" y1="200" x2="100" y2="220" />
-              <line x1="500" y1="200" x2="500" y2="220" />
-              
-              {/* Walls */}
-              <rect x="100" y="220" width="400" height="180" />
-              
-              {/* Foundation */}
-              <rect x="90" y="400" width="420" height="30" fill="#cbd5e1" opacity="0.4" />
-              
-              {/* Insulation Layer */}
-              <rect x="110" y="230" width="380" height="160" strokeDasharray="5,5" stroke="#10B981" strokeWidth="4" opacity="0.8">
-                <animate attributeName="opacity" values="0.6;1;0.6" dur="4s" repeatCount="indefinite" />
-              </rect>
-              
-              {/* Windows */}
-              <rect x="150" y="270" width="60" height="80" />
-              <rect x="390" y="270" width="60" height="80" />
-              
-              {/* Door */}
-              <rect x="270" y="310" width="60" height="90" />
-              
-              {/* Attic insulation */}
-              <path d="M 120 195 L 300 60 L 482 195" strokeDasharray="5,5" stroke="#10B981" strokeWidth="3" opacity="0.8" />
-            </g>
-            
-            {/* Heat arrows outside */}
-            <g fill="none">
-              {/* Left side heat arrows */}
-              <g stroke="#ff4500" strokeWidth="3" fill="#ff4500">
-                <line x1="20" y1="150" x2="85" y2="150">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" />
-                </line>
-                <polygon points="80,143 92,150 80,157">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" />
-                </polygon>
-                
-                <line x1="20" y1="280" x2="85" y2="280">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="0.8s" />
-                </line>
-                <polygon points="80,273 92,280 80,287">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="0.8s" />
-                </polygon>
-                
-                <line x1="20" y1="350" x2="85" y2="350">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="1.6s" />
-                </line>
-                <polygon points="80,343 92,350 80,357">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="1.6s" />
-                </polygon>
-              </g>
-              
-              {/* Right side heat arrows */}
-              <g stroke="#ff4500" strokeWidth="3" fill="#ff4500">
-                <line x1="580" y1="150" x2="515" y2="150">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="0.4s" />
-                </line>
-                <polygon points="520,143 508,150 520,157">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="0.4s" />
-                </polygon>
-                
-                <line x1="580" y1="280" x2="515" y2="280">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="1.2s" />
-                </line>
-                <polygon points="520,273 508,280 520,287">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="1.2s" />
-                </polygon>
-                
-                <line x1="580" y1="350" x2="515" y2="350">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="2s" />
-                </line>
-                <polygon points="520,343 508,350 520,357">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" begin="2s" />
-                </polygon>
-              </g>
-              
-              {/* Heat wave lines */}
-              <g stroke="#ff4500" strokeWidth="2" opacity="0.8">
-                <path d="M 10 130 Q 20 120, 30 130 T 50 130">
-                  <animate attributeName="d" 
-                    values="M 10 130 Q 20 120, 30 130 T 50 130;M 10 130 Q 20 140, 30 130 T 50 130;M 10 130 Q 20 120, 30 130 T 50 130" 
-                    dur="2s" repeatCount="indefinite" />
-                </path>
-                <path d="M 10 170 Q 20 180, 30 170 T 50 170">
-                  <animate attributeName="d" 
-                    values="M 10 170 Q 20 180, 30 170 T 50 170;M 10 170 Q 20 160, 30 170 T 50 170;M 10 170 Q 20 180, 30 170 T 50 170" 
-                    dur="2s" repeatCount="indefinite" begin="0.5s" />
-                </path>
-                <path d="M 10 300 Q 20 290, 30 300 T 50 300">
-                  <animate attributeName="d" 
-                    values="M 10 300 Q 20 290, 30 300 T 50 300;M 10 300 Q 20 310, 30 300 T 50 300;M 10 300 Q 20 290, 30 300 T 50 300" 
-                    dur="2s" repeatCount="indefinite" begin="1s" />
-                </path>
-                
-                <path d="M 550 130 Q 560 120, 570 130 T 590 130">
-                  <animate attributeName="d" 
-                    values="M 550 130 Q 560 120, 570 130 T 590 130;M 550 130 Q 560 140, 570 130 T 590 130;M 550 130 Q 560 120, 570 130 T 590 130" 
-                    dur="2s" repeatCount="indefinite" begin="0.3s" />
-                </path>
-                <path d="M 550 170 Q 560 180, 570 170 T 590 170">
-                  <animate attributeName="d" 
-                    values="M 550 170 Q 560 180, 570 170 T 590 170;M 550 170 Q 560 160, 570 170 T 590 170;M 550 170 Q 560 180, 570 170 T 590 170" 
-                    dur="2s" repeatCount="indefinite" begin="0.8s" />
-                </path>
-                <path d="M 550 300 Q 560 290, 570 300 T 590 300">
-                  <animate attributeName="d" 
-                    values="M 550 300 Q 560 290, 570 300 T 590 300;M 550 300 Q 560 310, 570 300 T 590 300;M 550 300 Q 560 290, 570 300 T 590 300" 
-                    dur="2s" repeatCount="indefinite" begin="1.3s" />
-                </path>
-              </g>
-            </g>
-            
-            {/* Cool air inside */}
-            <g fill="#10B981" opacity="0.5">
-              <circle cx="300" cy="300" r="3">
-                <animate attributeName="cy" values="300;280;300" dur="3s" repeatCount="indefinite" />
-              </circle>
-              <circle cx="200" cy="320" r="3">
-                <animate attributeName="cy" values="320;300;320" dur="3.5s" repeatCount="indefinite" />
-              </circle>
-              <circle cx="400" cy="310" r="3">
-                <animate attributeName="cy" values="310;290;310" dur="4s" repeatCount="indefinite" />
-              </circle>
-            </g>
-            
-            {/* Text labels */}
-            <text x="300" y="130" textAnchor="middle" fill="#475569" fontSize="16" fontWeight="600" opacity="0.8">Insulated Attic</text>
-            <text x="40" y="140" fill="#ff6b35" fontSize="14" fontWeight="600" opacity="0.8">Hot Air</text>
-            <text x="300" y="350" textAnchor="middle" fill="#10B981" fontSize="14" fontWeight="600" opacity="0.8">Cool Interior</text>
-          </svg>
-        </div>
+        <BlueprintHouse />
         
         {/* Animated heat/cold particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-1">
@@ -1009,20 +1019,13 @@ function App() {
         
         <div className={`container mx-auto px-4 lg:px-8 ${isMobile ? 'py-4' : 'py-11 lg:py-15'} relative z-10 w-full`}>
           <div className="grid lg:grid-cols-2 gap-10 items-center h-full">
-            <div className={`${isMobile ? 'space-y-3' : 'space-y-6'} fade-up mobile-animate max-w-4xl`} style={isMobile ? { contain: 'layout style paint' } : {}}>
+            <div className={`${isMobile ? 'space-y-3 mobile-contain-layout-style-paint' : 'space-y-6'} fade-up mobile-animate max-w-4xl`}>
               {isMobile ? (
                 <>
                   {/* Mobile-specific hero content */}
-                  <div className="relative" style={{ contain: 'layout style' }}>
+                  <div className="relative mobile-contain-layout-style">
                     {/* Smaller heat wave effect */}
-                    <div 
-                      className="absolute -top-4 -left-4 -right-4 h-20 rounded-full"
-                      style={{
-                        background: 'radial-gradient(ellipse at center, rgba(239,68,68,0.15) 0%, transparent 70%)',
-                        filter: 'blur(20px)',
-                        transform: 'translateZ(0)'
-                      }}
-                    />
+                    <div className="absolute -top-4 -left-4 -right-4 h-20 rounded-full mobile-heat-wave" />
                     
                     <div className="relative z-10">
                       {/* Simplified temperature badge */}
@@ -1042,24 +1045,15 @@ function App() {
                       {/* Value proposition */}
                       <div className="text-center mb-3">
                         <p className="text-base text-gray-700 font-medium">Cut your cooling costs by up to</p>
-                        <div className="relative inline-block my-1" style={{ isolation: 'isolate' }}>
+                        <div className="relative inline-block my-1 isolate">
                           <span className="text-5xl font-black mobile-hero-gradient-text">35%</span>
-                          <div 
-                            className="absolute -inset-1 rounded-full"
-                            style={{
-                              background: 'linear-gradient(to right, #16a34a, #10b981)',
-                              opacity: 0.15,
-                              filter: 'blur(15px)',
-                              transform: 'translateZ(0)',
-                              zIndex: -1
-                            }}
-                          />
+                          <div className="absolute -inset-1 rounded-full mobile-hero-glow" />
                         </div>
                         <p className="text-xs text-gray-600">With proper insulation</p>
                       </div>
                       
                       {/* Streamlined metrics card */}
-                      <div className="bg-white rounded-lg p-3 shadow-lg border border-gray-100" style={{ contain: 'layout' }}>
+                      <div className="bg-white rounded-lg p-3 shadow-lg border border-gray-100 mobile-contain-layout">
                         {/* Simple heat indicator */}
                         <div className="mb-3">
                           <div className="flex items-center justify-between mb-1.5">
@@ -1069,7 +1063,7 @@ function App() {
                             <div 
                               className="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-300"
                               style={{ 
-                                width: `${Math.min(headerState.currentTemp, 100)}%`,
+                                width: temperatureBarWidth,
                                 transform: 'translateZ(0)',
                                 willChange: 'width'
                               }}
@@ -1100,7 +1094,7 @@ function App() {
                     <Button 
                       size="lg" 
                       className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 text-base shadow-xl mobile-hero-button"
-                      onClick={() => setShowBottomSheet(true)}
+                      onClick={useCallback(() => setShowBottomSheet(true), [])}
                     >
                       Get Free Quote →
                     </Button>
