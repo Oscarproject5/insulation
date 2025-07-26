@@ -921,7 +921,12 @@ function App() {
                 <div className="hidden lg:block absolute left-[260px] top-1/2 -translate-y-1/2 w-[1px] h-12 bg-gradient-to-b from-transparent via-gray-200 to-transparent" />
               )}
               {!isMobile && (
-                <div>
+                <button 
+                  onClick={() => {
+                    window.scrollTo({top: 0, behavior: 'smooth'});
+                  }}
+                  className="hover:opacity-80 transition-opacity"
+                >
                   <h1 className="text-lg font-bold text-gray-900">Valley Insulation Pros</h1>
                   <div className="flex items-center gap-2 text-xs text-gray-600">
                     <span>Licensed & Insured</span>
@@ -935,7 +940,7 @@ function App() {
                       <span className="font-semibold">4.9</span>
                     </div>
                   </div>
-                </div>
+                </button>
               )}
               {isMobile && (
                 <div>
@@ -949,6 +954,77 @@ function App() {
               )}
             </div>
             
+            {/* Desktop Navigation */}
+            {!isMobile && (
+              <nav className="hidden lg:flex items-center gap-8">
+                <button 
+                  onClick={() => {
+                    const element = document.getElementById('services');
+                    if (element) {
+                      const yOffset = -80;
+                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                      window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                  }}
+                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
+                >
+                  Services
+                </button>
+                <button 
+                  onClick={() => {
+                    const element = document.getElementById('about');
+                    if (element) {
+                      const yOffset = -80;
+                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                      window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                  }}
+                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
+                >
+                  About
+                </button>
+                <button 
+                  onClick={() => {
+                    const element = document.getElementById('reviews');
+                    if (element) {
+                      const yOffset = -80;
+                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                      window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                  }}
+                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
+                >
+                  Reviews
+                </button>
+                <button 
+                  onClick={() => {
+                    const element = document.getElementById('contact');
+                    if (element) {
+                      const yOffset = -80;
+                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                      window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                  }}
+                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
+                >
+                  Contact
+                </button>
+                <button 
+                  onClick={() => {
+                    const element = document.getElementById('quote');
+                    if (element) {
+                      const yOffset = -80;
+                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                      window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                  }}
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg"
+                >
+                  Get Free Quote
+                </button>
+              </nav>
+            )}
+            
             {/* Phone Number - THE HERO */}
             <div className="text-right relative">
               {/* Decorative accent */}
@@ -958,6 +1034,12 @@ function App() {
                 </div>
               )}
               <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 mb-1 flex items-center gap-2 justify-end`}>
+                {!isMobile && (
+                  <div className="inline-flex items-center gap-1 mr-3">
+                    <Thermometer className="h-4 w-4 text-red-500" />
+                    <span className="font-semibold text-red-600">{headerState.currentTemp}°F</span>
+                  </div>
+                )}
                 <span>Call for FREE Quote</span>
                 {!isMobile && (
                   <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold animate-pulse">
@@ -1668,7 +1750,7 @@ function App() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+      <section id="reviews" className="py-16 bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
