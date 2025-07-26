@@ -754,7 +754,7 @@ function App() {
   )
 
   return (
-    <div className={`min-h-screen bg-white ${isMobile ? 'pb-24' : ''}`}>
+    <div className={`min-h-screen bg-white ${isMobile ? 'pb-16' : ''}`}>
       {/* Modals */}
       <PrivacyModal />
       <TermsModal />
@@ -835,7 +835,7 @@ function App() {
       {/* No spacer needed - hero section will handle padding */}
 
       {/* Hero Section */}
-      <section id="hero" className="hero-modern grain-overlay relative flex items-center" style={{ marginTop: isMobile ? '60px' : '0' }}>
+      <section id="hero" className="hero-modern grain-overlay relative flex items-center" style={{ marginTop: isMobile ? '50px' : '0', minHeight: isMobile ? 'calc(100vh - 106px)' : 'auto' }}>
         {!isMobile && (
           <>
             <div className="geometric-shape w-96 h-96 -top-20 -right-20" />
@@ -1007,67 +1007,65 @@ function App() {
           ))}
         </div>
         
-        <div className="container mx-auto px-4 lg:px-8 py-11 lg:py-15 relative z-10 w-full">
+        <div className={`container mx-auto px-4 lg:px-8 ${isMobile ? 'py-4' : 'py-11 lg:py-15'} relative z-10 w-full`}>
           <div className="grid lg:grid-cols-2 gap-10 items-center h-full">
-            <div className="space-y-6 fade-up mobile-animate max-w-4xl" style={isMobile ? { contain: 'layout style paint' } : {}}>
+            <div className={`${isMobile ? 'space-y-3' : 'space-y-6'} fade-up mobile-animate max-w-4xl`} style={isMobile ? { contain: 'layout style paint' } : {}}>
               {isMobile ? (
                 <>
                   {/* Mobile-specific hero content */}
                   <div className="relative" style={{ contain: 'layout style' }}>
-                    {/* Animated heat wave effect - optimized with transform */}
+                    {/* Smaller heat wave effect */}
                     <div 
-                      className="absolute -top-8 -left-8 -right-8 h-40 rounded-full"
+                      className="absolute -top-4 -left-4 -right-4 h-20 rounded-full"
                       style={{
-                        background: 'radial-gradient(ellipse at center, rgba(239,68,68,0.2) 0%, rgba(251,146,60,0.1) 50%, transparent 100%)',
-                        filter: 'blur(40px)',
-                        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        willChange: 'opacity',
+                        background: 'radial-gradient(ellipse at center, rgba(239,68,68,0.15) 0%, transparent 70%)',
+                        filter: 'blur(20px)',
                         transform: 'translateZ(0)'
                       }}
                     />
                     
                     <div className="relative z-10">
                       {/* Simplified temperature badge */}
-                      <div className="inline-flex items-center gap-2 bg-red-500/90 text-white px-3 py-1 rounded-full mb-4 text-xs font-medium">
+                      <div className="inline-flex items-center gap-1.5 bg-red-500/90 text-white px-2.5 py-0.5 rounded-full mb-3 text-xs font-medium">
                         <Thermometer className="h-3 w-3" />
                         <span>Current Temp: {headerState.currentTemp}°F</span>
                       </div>
                       
                       {/* Simplified headline */}
-                      <h2 className="text-3xl font-black text-gray-900 leading-tight mb-4">
+                      <h2 className="text-2xl font-black text-gray-900 leading-tight mb-3">
                         Stop Wasting Money on
-                        <span className="block text-3xl text-orange-600">
+                        <span className="block text-2xl text-orange-600">
                           High AC Bills
                         </span>
                       </h2>
                       
                       {/* Value proposition */}
-                      <div className="text-center mb-4">
-                        <p className="text-lg text-gray-700 font-medium">Cut your cooling costs by up to</p>
-                        <div className="relative inline-block my-2" style={{ isolation: 'isolate' }}>
-                          <span className="text-6xl font-black mobile-hero-gradient-text">35%</span>
+                      <div className="text-center mb-3">
+                        <p className="text-base text-gray-700 font-medium">Cut your cooling costs by up to</p>
+                        <div className="relative inline-block my-1" style={{ isolation: 'isolate' }}>
+                          <span className="text-5xl font-black mobile-hero-gradient-text">35%</span>
                           <div 
                             className="absolute -inset-1 rounded-full"
                             style={{
                               background: 'linear-gradient(to right, #16a34a, #10b981)',
-                              opacity: 0.2,
-                              filter: 'blur(20px)',
+                              opacity: 0.15,
+                              filter: 'blur(15px)',
                               transform: 'translateZ(0)',
                               zIndex: -1
                             }}
                           />
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">With proper insulation</p>
+                        <p className="text-xs text-gray-600">With proper insulation</p>
                       </div>
                       
                       {/* Streamlined metrics card */}
-                      <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100" style={{ contain: 'layout' }}>
+                      <div className="bg-white rounded-lg p-3 shadow-lg border border-gray-100" style={{ contain: 'layout' }}>
                         {/* Simple heat indicator */}
-                        <div className="mb-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-semibold text-gray-700">Poor Insulation Impact:</span>
+                        <div className="mb-3">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-semibold text-gray-700">Poor Insulation Impact:</span>
                           </div>
-                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                             <div 
                               className="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-300"
                               style={{ 
@@ -1080,41 +1078,41 @@ function App() {
                         </div>
                         
                         {/* Three key metrics */}
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                          <div className="bg-red-50 rounded-lg py-3 px-2 mobile-hero-metrics">
-                            <p className="text-xl font-bold text-red-600">35%</p>
-                            <p className="text-xs text-gray-600">Energy Lost</p>
+                        <div className="grid grid-cols-3 gap-1.5 text-center">
+                          <div className="bg-red-50 rounded-lg py-2 px-1 mobile-hero-metrics">
+                            <p className="text-lg font-bold text-red-600">35%</p>
+                            <p className="text-[10px] text-gray-600">Energy Lost</p>
                           </div>
-                          <div className="bg-orange-50 rounded-lg py-3 px-2 mobile-hero-metrics">
-                            <p className="text-xl font-bold text-orange-600">3x</p>
-                            <p className="text-xs text-gray-600">AC Works</p>
+                          <div className="bg-orange-50 rounded-lg py-2 px-1 mobile-hero-metrics">
+                            <p className="text-lg font-bold text-orange-600">3x</p>
+                            <p className="text-[10px] text-gray-600">AC Works</p>
                           </div>
-                          <div className="bg-green-50 rounded-lg py-3 px-2 mobile-hero-metrics">
-                            <p className="text-xl font-bold text-green-600">$189</p>
-                            <p className="text-xs text-gray-600">Save/Mo</p>
+                          <div className="bg-green-50 rounded-lg py-2 px-1 mobile-hero-metrics">
+                            <p className="text-lg font-bold text-green-600">$189</p>
+                            <p className="text-[10px] text-gray-600">Save/Mo</p>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
                   {/* Simplified CTA section */}
-                  <div className="mt-6 space-y-3">
+                  <div className="mt-3 space-y-2">
                     <Button 
                       size="lg" 
-                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 text-lg shadow-xl mobile-hero-button"
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 text-base shadow-xl mobile-hero-button"
                       onClick={() => setShowBottomSheet(true)}
                     >
                       Get Free Quote →
                     </Button>
                     
                     {/* Trust indicators */}
-                    <div className="flex items-center justify-center gap-4 text-xs text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <Shield className="h-4 w-4 text-green-600" />
+                    <div className="flex items-center justify-center gap-3 text-[11px] text-gray-600">
+                      <div className="flex items-center gap-0.5">
+                        <Shield className="h-3.5 w-3.5 text-green-600" />
                         <span>Licensed & Insured</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-blue-600" />
+                      <div className="flex items-center gap-0.5">
+                        <Clock className="h-3.5 w-3.5 text-blue-600" />
                         <span>Same Day Service</span>
                       </div>
                     </div>
@@ -2466,16 +2464,37 @@ function App() {
           </div>
           
           <div className="max-w-6xl mx-auto rounded-xl overflow-hidden shadow-2xl">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d458795.5488585585!2d-98.1628!3d26.1685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1"
-              width="100%"
-              height="450"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Rio Grande Valley Service Area Map"
-            ></iframe>
+            <div className="relative bg-gray-100" style={{ height: '450px' }}>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d458795.5488585585!2d-98.1628!3d26.1685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1"
+                width="100%"
+                height="450"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Rio Grande Valley Service Area Map"
+                className="relative z-10"
+              />
+              {/* Fallback image for when iframe is blocked */}
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-gray-100 to-gray-200">
+                <div className="text-center p-8">
+                  <MapPin className="h-16 w-16 text-orange-500 mx-auto mb-4" />
+                  <h4 className="text-2xl font-bold text-gray-800 mb-2">Rio Grande Valley Service Area</h4>
+                  <p className="text-gray-600 mb-6">We serve all cities within 50 miles of McAllen</p>
+                  <div className="text-gray-700 mb-6">
+                    <p className="font-semibold mb-2">Including:</p>
+                    <p>McAllen • Edinburg • Brownsville • Harlingen • Mission • Pharr</p>
+                  </div>
+                  <Button 
+                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white"
+                    onClick={() => window.open('https://maps.google.com/?q=Rio+Grande+Valley+TX', '_blank')}
+                  >
+                    Open in Google Maps →
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div className="mt-8 text-center">
