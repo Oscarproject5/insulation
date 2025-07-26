@@ -1,0 +1,16 @@
+{
+  "name": "RGV Insulation Experts",
+  "short_name": "RGV Insulation",
+  "description": "Professional insulation services in Rio Grande Valley. Save up to 35% on energy bills.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff6b35",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
