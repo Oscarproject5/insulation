@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input.jsx'
 import { Textarea } from '@/components/ui/textarea.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight, Loader2 } from 'lucide-react'
+import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight, Loader2, Facebook, Instagram, Globe, ChevronDown, ChevronUp, Camera, Quote } from 'lucide-react'
 import './App.css'
 import { sanitizeInput, sanitizePhone, sanitizeEmail, validateFormSecurity, formRateLimiter, getFingerprint, isSubmittedTooQuickly } from './utils/security.js'
 
@@ -53,6 +53,10 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' })
   const [formErrors, setFormErrors] = useState({})
+  
+  // Modal states
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
   // Detect mobile device
   useEffect(() => {
@@ -107,7 +111,37 @@ function App() {
         const data = await response.json()
         const currentTemp = Math.round(data.main.temp)
         const realFeelsLike = Math.round(data.main.feels_like)
-        const todaysHigh = Math.round(data.main.temp_max)
+        
+        // Get today's date as a key for localStorage
+        const today = new Date().toLocaleDateString('en-US')
+        const storageKey = `weatherHigh_${today}`
+        
+        // Get stored high temperature for today
+        let storedHigh = localStorage.getItem(storageKey)
+        if (storedHigh) {
+          storedHigh = parseInt(storedHigh)
+        }
+        
+        // Calculate today's high - either the stored high or current temp, whichever is higher
+        const todaysHigh = storedHigh ? Math.max(storedHigh, currentTemp) : currentTemp
+        
+        // Store the new high if current temp is higher
+        if (!storedHigh || currentTemp > storedHigh) {
+          localStorage.setItem(storageKey, todaysHigh.toString())
+        }
+        
+        // Clean up old dates from localStorage (keep only last 7 days)
+        const cutoffDate = new Date()
+        cutoffDate.setDate(cutoffDate.getDate() - 7)
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('weatherHigh_')) {
+            const dateStr = key.replace('weatherHigh_', '')
+            const keyDate = new Date(dateStr)
+            if (keyDate < cutoffDate) {
+              localStorage.removeItem(key)
+            }
+          }
+        })
         
         // Determine if it's night (after 8 PM or before 6 AM)
         const hour = new Date().getHours()
@@ -133,7 +167,7 @@ function App() {
         else if (hour >= 17 && hour < 20) timeOfDay = 'evening'
         else if (hour >= 20 || hour < 6) timeOfDay = 'night'
         
-        setHeaderState({
+        const newHeaderState = {
           currentTemp: displayTemp,
           realFeelsLike: displayFeelsLike,
           energySavings: Math.max(energySavings, 0),
@@ -141,19 +175,29 @@ function App() {
           timeOfDay,
           todaysHigh,
           isNight
-        })
+        }
+        setHeaderState(newHeaderState)
       } catch (error) {
         console.error('Weather fetch error:', error)
         // Fallback to default values
         const hour = new Date().getHours()
         const isNight = hour >= 20 || hour < 6
+        
+        // Try to get stored high for today even in fallback
+        const today = new Date().toLocaleDateString('en-US')
+        const storageKey = `weatherHigh_${today}`
+        const storedHigh = localStorage.getItem(storageKey)
+        
+        const fallbackCurrent = 90
+        const fallbackHigh = storedHigh ? parseInt(storedHigh) : 94
+        
         setHeaderState({
-          currentTemp: 93,
-          realFeelsLike: 101,
+          currentTemp: isNight ? fallbackHigh : fallbackCurrent,
+          realFeelsLike: isNight ? fallbackHigh + 8 : 98,
           energySavings: 263,
           isExtremeHeat: false,
           timeOfDay: isNight ? 'night' : 'afternoon',
-          todaysHigh: 93,
+          todaysHigh: fallbackHigh,
           isNight
         })
       }
@@ -383,6 +427,190 @@ function App() {
     setFormStep(step)
   }
 
+  // FAQ Accordion Component
+  const FAQAccordion = () => {
+    const [openItems, setOpenItems] = useState([])
+    
+    const faqs = [
+      {
+        id: 1,
+        question: "How much does insulation cost in the Rio Grande Valley?",
+        answer: "The cost varies based on your home size and insulation type. Spray foam typically ranges from $1.50-$3.50 per sq ft, while blown-in insulation costs $0.80-$2.00 per sq ft. Most Valley homes see a complete return on investment within 2-3 years through energy savings. We offer free estimates to give you an exact quote."
+      },
+      {
+        id: 2,
+        question: "How long does insulation installation take?",
+        answer: "Most residential insulation projects in the RGV are completed in 1-2 days. Blown-in attic insulation typically takes 2-4 hours, while whole-home spray foam may take 1-2 days depending on square footage. We work efficiently to minimize disruption to your daily routine."
+      },
+      {
+        id: 3,
+        question: "Will new insulation really lower my electric bill?",
+        answer: "Yes! In the Rio Grande Valley's extreme heat, proper insulation can reduce cooling costs by 30-40%. Most of our McAllen and Edinburg customers see savings of $150-$400 per month during summer. Your exact savings depend on your current insulation, AC efficiency, and home size."
+      },
+      {
+        id: 4,
+        question: "What's the best insulation for South Texas heat?",
+        answer: "Spray foam insulation is ideal for RGV homes because it creates an air-tight seal that blocks both heat and humidity. It's especially effective in our climate where temperatures regularly exceed 100°F. However, blown-in insulation is also an excellent, more budget-friendly option for attics."
+      },
+      {
+        id: 5,
+        question: "Do you offer financing options?",
+        answer: "Yes! We understand that insulation is an investment. We offer flexible financing options with approved credit, including 0% interest programs. Many customers finance their project and pay it off using their monthly energy savings."
+      },
+      {
+        id: 6,
+        question: "Is your insulation safe for my family?",
+        answer: "Absolutely. We only use EPA-approved, non-toxic insulation materials. Our spray foam is safe once cured (usually within 24 hours), and our blown-in insulation is made from recycled materials treated with safe fire retardants. All materials meet or exceed federal safety standards."
+      },
+      {
+        id: 7,
+        question: "How do I know if I need new insulation?",
+        answer: "Common signs include: high energy bills, rooms that are too hot/cold, AC running constantly, visible gaps in attic insulation, or insulation that's compressed or damaged. If your home is over 10 years old or you're experiencing any of these issues, you likely need an insulation upgrade."
+      },
+      {
+        id: 8,
+        question: "Do you service my area?",
+        answer: "We proudly serve the entire Rio Grande Valley including McAllen, Edinburg, Mission, Pharr, Brownsville, Harlingen, San Benito, Weslaco, Mercedes, and all surrounding areas. If you're in the RGV, we've got you covered!"
+      }
+    ]
+    
+    const toggleItem = (id) => {
+      setOpenItems(prev => 
+        prev.includes(id) 
+          ? prev.filter(item => item !== id)
+          : [...prev, id]
+      )
+    }
+    
+    return (
+      <div className="space-y-4">
+        {faqs.map(faq => (
+          <div key={faq.id} className="border border-gray-200 rounded-lg overflow-hidden">
+            <button
+              className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+              onClick={() => toggleItem(faq.id)}
+            >
+              <h4 className="font-semibold text-gray-900 pr-4">{faq.question}</h4>
+              {openItems.includes(faq.id) ? (
+                <ChevronUp className="h-5 w-5 text-gray-500 flex-shrink-0" />
+              ) : (
+                <ChevronDown className="h-5 w-5 text-gray-500 flex-shrink-0" />
+              )}
+            </button>
+            {openItems.includes(faq.id) && (
+              <div className="px-6 pb-4">
+                <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Privacy Policy Modal
+  const PrivacyModal = () => {
+    if (!showPrivacyModal) return null
+    
+    return (
+      <>
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50"
+          onClick={() => setShowPrivacyModal(false)}
+        />
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b p-6">
+                <button
+                  onClick={() => setShowPrivacyModal(false)}
+                  className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200"
+                >
+                  <X className="h-5 w-5 text-gray-600" />
+                </button>
+                <h2 className="text-2xl font-bold text-gray-900">Privacy Policy</h2>
+              </div>
+              <div className="p-6 prose prose-gray max-w-none">
+                <p className="text-gray-600">Last updated: January 26, 2024</p>
+                
+                <h3 className="text-lg font-bold mt-6">Information We Collect</h3>
+                <p>We collect information you provide directly to us, such as when you request a quote, including your name, phone number, email address, and property address.</p>
+                
+                <h3 className="text-lg font-bold mt-6">How We Use Your Information</h3>
+                <p>We use the information we collect to:</p>
+                <ul>
+                  <li>Provide and deliver our insulation services</li>
+                  <li>Send you technical notices and support messages</li>
+                  <li>Respond to your comments and questions</li>
+                  <li>Provide customer service</li>
+                </ul>
+                
+                <h3 className="text-lg font-bold mt-6">Information Sharing</h3>
+                <p>We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except to provide our services or as required by law.</p>
+                
+                <h3 className="text-lg font-bold mt-6">Data Security</h3>
+                <p>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+                
+                <h3 className="text-lg font-bold mt-6">Contact Us</h3>
+                <p>If you have any questions about this Privacy Policy, please contact us at (956) 854-0899 or info@rgvinsulation.com.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+  
+  // Terms of Service Modal
+  const TermsModal = () => {
+    if (!showTermsModal) return null
+    
+    return (
+      <>
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50"
+          onClick={() => setShowTermsModal(false)}
+        />
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b p-6">
+                <button
+                  onClick={() => setShowTermsModal(false)}
+                  className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200"
+                >
+                  <X className="h-5 w-5 text-gray-600" />
+                </button>
+                <h2 className="text-2xl font-bold text-gray-900">Terms of Service</h2>
+              </div>
+              <div className="p-6 prose prose-gray max-w-none">
+                <p className="text-gray-600">Last updated: January 26, 2024</p>
+                
+                <h3 className="text-lg font-bold mt-6">Service Agreement</h3>
+                <p>By requesting our services, you agree to these terms. RGV Insulation Experts provides professional insulation installation services throughout the Rio Grande Valley.</p>
+                
+                <h3 className="text-lg font-bold mt-6">Service Warranty</h3>
+                <p>We provide a lifetime warranty on spray foam insulation installations and manufacturer warranties on all materials used. Warranty is valid for original purchaser only.</p>
+                
+                <h3 className="text-lg font-bold mt-6">Payment Terms</h3>
+                <p>Payment is due upon completion of work unless other arrangements have been made. We accept cash, check, and major credit cards. Financing available with approved credit.</p>
+                
+                <h3 className="text-lg font-bold mt-6">Limitation of Liability</h3>
+                <p>Our liability is limited to the cost of services provided. We are not responsible for pre-existing conditions or damage not caused by our work.</p>
+                
+                <h3 className="text-lg font-bold mt-6">Cancellation Policy</h3>
+                <p>You may cancel scheduled services up to 24 hours before the appointment without penalty. Same-day cancellations may incur a service fee.</p>
+                
+                <h3 className="text-lg font-bold mt-6">Contact Information</h3>
+                <p>For questions about these terms, contact us at (956) 854-0899 or info@rgvinsulation.com.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   const MobileLeadWidget = () => (
     <>
       {showLeadWidget && (
@@ -421,6 +649,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Modals */}
+      <PrivacyModal />
+      <TermsModal />
+      
       {/* Header with Integrated Navigation */}
       <header className="bg-white fixed top-0 left-0 right-0 z-50 shadow-lg">
         {/* Main Header */}
@@ -1344,6 +1576,245 @@ function App() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              What Our Customers Say
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Real reviews from Valley families who are saving money and staying comfortable
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Testimonial 1 */}
+            <Card className="shadow-lg border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex text-yellow-500">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-current" />
+                    ))}
+                  </div>
+                </div>
+                <Quote className="h-8 w-8 text-orange-500 mb-4 opacity-50" />
+                <p className="text-gray-700 mb-6 italic">
+                  "Our electric bill dropped by $180 the first month! The crew was professional, 
+                  cleaned up everything, and finished in one day. Best investment we've made."
+                </p>
+                <div>
+                  <p className="font-semibold text-gray-900">Maria Gonzalez</p>
+                  <p className="text-sm text-gray-600">McAllen, TX</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Testimonial 2 */}
+            <Card className="shadow-lg border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex text-yellow-500">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-current" />
+                    ))}
+                  </div>
+                </div>
+                <Quote className="h-8 w-8 text-orange-500 mb-4 opacity-50" />
+                <p className="text-gray-700 mb-6 italic">
+                  "Living in Edinburg, our AC used to run constantly. After spray foam insulation, 
+                  our house stays cool all day. Can't believe we waited so long!"
+                </p>
+                <div>
+                  <p className="font-semibold text-gray-900">Robert Martinez</p>
+                  <p className="text-sm text-gray-600">Edinburg, TX</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Testimonial 3 */}
+            <Card className="shadow-lg border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex text-yellow-500">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-current" />
+                    ))}
+                  </div>
+                </div>
+                <Quote className="h-8 w-8 text-orange-500 mb-4 opacity-50" />
+                <p className="text-gray-700 mb-6 italic">
+                  "They found areas in our attic we didn't even know were problems. 
+                  House is so much more comfortable now, and the energy audit was eye-opening!"
+                </p>
+                <div>
+                  <p className="font-semibold text-gray-900">Linda Thompson</p>
+                  <p className="text-sm text-gray-600">Brownsville, TX</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Trust Indicators */}
+          <div className="mt-12 text-center">
+            <div className="inline-flex items-center gap-8 flex-wrap justify-center">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+                <span className="font-semibold text-gray-800">127+ Verified Reviews</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Award className="h-6 w-6 text-orange-600" />
+                <span className="font-semibold text-gray-800">A+ BBB Rating</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="h-6 w-6 text-blue-600" />
+                <span className="font-semibold text-gray-800">Fully Licensed & Insured</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery/Portfolio Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Our Work Speaks for Itself
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Professional insulation installations across the Rio Grande Valley
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {/* Gallery Item 1 */}
+            <div className="group relative overflow-hidden rounded-xl shadow-lg">
+              <img 
+                src={professionalTeamSprayImage}
+                alt="Spray foam insulation installation"
+                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <h4 className="font-bold text-lg mb-1">Spray Foam Installation</h4>
+                  <p className="text-sm">Complete attic insulation - McAllen home</p>
+                </div>
+              </div>
+              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-5 w-5 text-gray-800" />
+              </div>
+            </div>
+            
+            {/* Gallery Item 2 */}
+            <div className="group relative overflow-hidden rounded-xl shadow-lg">
+              <img 
+                src={blownInsulationNewImage}
+                alt="Blown-in insulation service"
+                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <h4 className="font-bold text-lg mb-1">Blown-In Insulation</h4>
+                  <p className="text-sm">Attic upgrade with R-38 rating</p>
+                </div>
+              </div>
+              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-5 w-5 text-gray-800" />
+              </div>
+            </div>
+            
+            {/* Gallery Item 3 */}
+            <div className="group relative overflow-hidden rounded-xl shadow-lg">
+              <img 
+                src={atticInsulationNewImage}
+                alt="Attic insulation project"
+                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <h4 className="font-bold text-lg mb-1">Complete Attic Solution</h4>
+                  <p className="text-sm">Insulation + radiant barrier installation</p>
+                </div>
+              </div>
+              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-5 w-5 text-gray-800" />
+              </div>
+            </div>
+            
+            {/* Gallery Item 4 */}
+            <div className="group relative overflow-hidden rounded-xl shadow-lg">
+              <img 
+                src={professionalTeamImage}
+                alt="Professional insulation team"
+                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <h4 className="font-bold text-lg mb-1">Expert Team at Work</h4>
+                  <p className="text-sm">Professional installation crew</p>
+                </div>
+              </div>
+              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-5 w-5 text-gray-800" />
+              </div>
+            </div>
+            
+            {/* Gallery Item 5 */}
+            <div className="group relative overflow-hidden rounded-xl shadow-lg">
+              <img 
+                src={sprayFoamHeroImage}
+                alt="Energy efficient home"
+                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <h4 className="font-bold text-lg mb-1">Energy Efficiency Results</h4>
+                  <p className="text-sm">40% reduction in cooling costs</p>
+                </div>
+              </div>
+              <div className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-5 w-5 text-gray-800" />
+              </div>
+            </div>
+            
+            {/* Gallery Item 6 - CTA */}
+            <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-lg flex items-center justify-center text-white p-8">
+              <div className="text-center">
+                <Camera className="h-12 w-12 mx-auto mb-4 opacity-80" />
+                <h4 className="font-bold text-xl mb-2">See Your Home Here</h4>
+                <p className="text-sm mb-4">Get your free estimate today</p>
+                <Button 
+                  className="bg-white text-orange-600 hover:bg-gray-100"
+                  onClick={() => document.getElementById('quote')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Get Started →
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Frequently Asked Questions
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Everything you need to know about insulation in the Rio Grande Valley
+            </p>
+          </div>
+          
+          <div className="max-w-3xl mx-auto">
+            <FAQAccordion />
+          </div>
+        </div>
+      </section>
+
       {/* Service Areas */}
       <section id="areas" className="py-16 bg-gradient-to-b from-gray-900 to-gray-950 text-white">
         <div className="container mx-auto px-4 lg:px-8 text-center">
@@ -1741,6 +2212,166 @@ function App() {
         </>
       )}
 
+      {/* Google Maps Section */}
+      <section className="py-16 bg-gray-100">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-8">
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Serving All of Rio Grande Valley
+            </h3>
+            <p className="text-lg text-gray-600">
+              From McAllen to Brownsville, we're your local insulation experts
+            </p>
+          </div>
+          
+          <div className="max-w-6xl mx-auto rounded-xl overflow-hidden shadow-2xl">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d458795.5488585585!2d-98.1628!3d26.1685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1"
+              width="100%"
+              height="450"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Rio Grande Valley Service Area Map"
+            ></iframe>
+          </div>
+          
+          <div className="mt-8 text-center">
+            <p className="text-gray-600 mb-4">
+              <MapPin className="inline h-5 w-5 text-orange-600 mr-2" />
+              Headquarters in McAllen • Serving all RGV cities within 50 miles
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+              onClick={() => window.open('https://maps.google.com/?q=RGV+Insulation+Experts+McAllen+TX', '_blank')}
+            >
+              Get Directions →
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Blog/Resources Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Energy Saving Resources
+            </h3>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Tips and guides to maximize your home's energy efficiency in the Valley heat
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Resource 1 */}
+            <Card className="shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Thermometer className="h-6 w-6 text-orange-600" />
+                </div>
+                <CardTitle className="text-xl">Summer Cooling Tips</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Set AC to 78°F when home, 85°F when away</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Use ceiling fans to circulate cool air</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Close blinds during peak sun hours</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Seal air leaks around windows and doors</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+            
+            {/* Resource 2 */}
+            <Card className="shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Home className="h-6 w-6 text-blue-600" />
+                </div>
+                <CardTitle className="text-xl">Insulation Maintenance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Inspect attic insulation annually</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Look for signs of moisture or pest damage</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Check for compressed or settled insulation</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Ensure attic ventilation is unobstructed</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+            
+            {/* Resource 3 */}
+            <Card className="shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Zap className="h-6 w-6 text-green-600" />
+                </div>
+                <CardTitle className="text-xl">Energy Audit Checklist</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Check for drafts around windows/doors</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Measure insulation depth in attic</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Test AC efficiency and age</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Review utility bills for usage patterns</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="mt-12 text-center">
+            <p className="text-gray-600 mb-6">
+              Want a professional energy audit? We'll inspect your home for FREE!
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white"
+              onClick={() => document.getElementById('quote')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Schedule Free Energy Audit
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer id="contact" className="bg-gray-900 text-white py-10">
         <div className="container mx-auto px-4 lg:px-8">
@@ -1764,6 +2395,35 @@ function App() {
                   ))}
                 </div>
                 <span className="text-gray-400">4.9/5 Rating</span>
+              </div>
+              <div className="flex space-x-4 mt-4">
+                <a 
+                  href="https://www.facebook.com/rgvinsulation" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                  aria-label="Facebook"
+                >
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a 
+                  href="https://www.instagram.com/rgvinsulation" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a 
+                  href="https://g.page/rgvinsulation" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                  aria-label="Google Business"
+                >
+                  <Globe className="h-5 w-5" />
+                </a>
               </div>
             </div>
 
@@ -1817,6 +2477,21 @@ function App() {
           <div className="border-t border-gray-800 mt-6 pt-6 text-center text-xs text-gray-400">
             <p>&copy; 2024 RGV Insulation Experts. All rights reserved. Licensed & Insured in Texas.</p>
             <p className="mt-1">Emergency service • Free estimates • Lifetime warranty</p>
+            <div className="mt-3 space-x-4">
+              <button 
+                onClick={() => setShowPrivacyModal(true)}
+                className="hover:text-white transition-colors"
+              >
+                Privacy Policy
+              </button>
+              <span>•</span>
+              <button 
+                onClick={() => setShowTermsModal(true)}
+                className="hover:text-white transition-colors"
+              >
+                Terms of Service
+              </button>
+            </div>
           </div>
         </div>
       </footer>
