@@ -1211,7 +1211,11 @@ function App() {
                     Combat those 100°F summers and high energy bills!
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    <Button size="lg" className="btn-primary mobile-ripple px-8 py-4 text-base font-semibold shadow-xl flex items-center justify-center">
+                    <Button 
+                      size="lg" 
+                      className="btn-primary mobile-ripple px-8 py-4 text-base font-semibold shadow-xl flex items-center justify-center"
+                      onClick={() => window.location.href = 'tel:+19568540899'}
+                    >
                       <Phone className="mr-2 h-4 w-4" />
                       Call or Text (956) 854-0899
                     </Button>
