@@ -2,9 +2,14 @@
   <!-- Background -->
   <rect width="32" height="32" rx="6" fill="#FF6B35"/>
   
-  <!-- Insulation layers -->
-  <path d="M6 12 Q16 8 26 12" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
-  <path d="M6 16 Q16 12 26 16" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
-  <path d="M6 20 Q16 16 26 20" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
-  <path d="M6 24 Q16 20 26 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+  <!-- House roof -->
+  <path d="M4 14 L16 4 L28 14" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- House walls -->
+  <rect x="6" y="14" width="20" height="14" fill="none" stroke="white" stroke-width="2.5"/>
+  
+  <!-- Insulation layers inside house -->
+  <path d="M8 17 Q12 15.5 16 17 T24 17" fill="none" stroke="white" stroke-width="2" opacity="0.9"/>
+  <path d="M8 21 Q12 19.5 16 21 T24 21" fill="none" stroke="white" stroke-width="2" opacity="0.7"/>
+  <path d="M8 25 Q12 23.5 16 25 T24 25" fill="none" stroke="white" stroke-width="2" opacity="0.5"/>
 </svg>

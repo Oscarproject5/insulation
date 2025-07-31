@@ -1,0 +1,22 @@
+To create the missing favicon files for Google search results:
+
+1. Go to a favicon generator like:
+   - https://realfavicongenerator.net/
+   - https://favicon.io/favicon-converter/
+   - https://www.favicon-generator.org/
+
+2. Upload your favicon.svg file
+
+3. Generate and download these files:
+   - favicon.ico (contains 16x16 and 32x32)
+   - favicon-16x16.png
+   - favicon-32x32.png  
+   - apple-touch-icon.png (180x180)
+   - android-chrome-192x192.png
+   - android-chrome-512x512.png
+
+4. Place all generated files in the /public folder
+
+5. The site.webmanifest should reference the android-chrome icons
+
+Google will then be able to display your shield favicon in search results.
