@@ -1078,33 +1078,35 @@ function App() {
         )}
         
         {/* Blueprint House Background */}
-        <BlueprintHouse />
+        {!isMobile && <BlueprintHouse />}
         
         {/* Animated heat/cold particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-1">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={`heat-${i}`}
-              className="heat-particle"
-              style={{
-                left: `${5 + (i * 20)}%`,
-                bottom: '20%',
-                animationDelay: `${i * 0.8}s`
-              }}
-            />
-          ))}
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={`cold-${i}`}
-              className="cold-particle"
-              style={{
-                left: `${25 + (i * 15)}%`,
-                top: '50%',
-                animationDelay: `${i * 1}s`
-              }}
-            />
-          ))}
-        </div>
+        {!isMobile && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-1">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={`heat-${i}`}
+                className="heat-particle"
+                style={{
+                  left: `${5 + (i * 20)}%`,
+                  bottom: '20%',
+                  animationDelay: `${i * 0.8}s`
+                }}
+              />
+            ))}
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={`cold-${i}`}
+                className="cold-particle"
+                style={{
+                  left: `${25 + (i * 15)}%`,
+                  top: '50%',
+                  animationDelay: `${i * 1}s`
+                }}
+              />
+            ))}
+          </div>
+        )}
         
         <div className={`container mx-auto px-4 lg:px-8 ${isMobile ? 'py-4' : 'py-11 lg:py-15'} relative z-10 w-full`}>
           <div className="grid lg:grid-cols-2 gap-10 items-center h-full">
@@ -1585,7 +1587,6 @@ function App() {
                   <div className="flex-1 p-3">
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="font-bold text-sm">Spray Foam Installation</h4>
-                      <Badge className="bg-green-100 text-green-700 text-xs px-2 py-0.5">Today</Badge>
                     </div>
                     <p className="text-xs text-gray-600 mb-2">Complete attic insulation - McAllen home</p>
                     <div className="flex items-center gap-4 text-xs">
@@ -1609,7 +1610,6 @@ function App() {
                   <div className="flex-1 p-3">
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="font-bold text-sm">Blown-In Insulation</h4>
-                      <Badge className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5">Yesterday</Badge>
                     </div>
                     <p className="text-xs text-gray-600 mb-2">Attic upgrade - Edinburg residence</p>
                     <div className="flex items-center gap-4 text-xs">
@@ -1633,7 +1633,6 @@ function App() {
                   <div className="flex-1 p-3">
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="font-bold text-sm">Complete Attic Solution</h4>
-                      <Badge className="bg-orange-100 text-orange-700 text-xs px-2 py-0.5">This week</Badge>
                     </div>
                     <p className="text-xs text-gray-600 mb-2">Full attic renovation - Harlingen home</p>
                     <div className="flex items-center gap-4 text-xs">

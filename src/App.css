@@ -137,9 +137,7 @@ body {
 
 @media (max-width: 768px) {
   .blueprint-house {
-    width: 400px;
-    height: 300px;
-    opacity: 0.15;
+    display: none;
   }
 }
 
@@ -931,14 +929,11 @@ html, body {
   }
 
   .hero-modern::before {
-    background-size: 15px 15px !important;
-    opacity: 0.05 !important;
+    display: none !important;
   }
 
   .blueprint-house {
-    opacity: 0.03 !important;
-    width: 280px !important;
-    height: 210px !important;
+    display: none !important;
   }
 
   .geometric-shape {
