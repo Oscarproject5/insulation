@@ -14,6 +14,7 @@ import professionalTeamImage from './assets/professional-team.jpg'
 import blownInsulationNewImage from './assets/blown-insulation-new.jpg'
 import atticInsulationNewImage from './assets/attic-insulation-new.jpg'
 import professionalTeamSprayImage from './assets/professional-team-spray.jpg'
+import palmTreesRgv from './assets/palm-trees-rgv.png'
 
 // Memoized Blueprint House Component
 const BlueprintHouse = React.memo(() => (
@@ -1114,11 +1115,25 @@ function App() {
               {isMobile ? (
                 <>
                   {/* Mobile-specific hero content */}
-                  <div className="relative mobile-contain-layout-style">
-                    {/* Smaller heat wave effect */}
-                    <div className="absolute -top-4 -left-4 -right-4 h-20 rounded-full mobile-heat-wave" />
+                  <div className="relative mobile-contain-layout-style rounded-2xl overflow-hidden">
+                    {/* Blurred palm trees background */}
+                    <div 
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage: `url(${palmTreesRgv})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        filter: 'blur(3px) brightness(1.1)',
+                        opacity: 0.8,
+                        zIndex: 0
+                      }}
+                    />
+                    {/* White overlay for readability */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/75 via-white/65 to-orange-50/50" style={{ zIndex: 1 }} />
                     
-                    <div className="relative z-10">
+                    {/* Content wrapper with padding */}
+                    <div className="relative p-4" style={{ zIndex: 2 }}>
                       {/* Simplified temperature badge */}
                       <div className="inline-flex items-center gap-1.5 bg-red-500/90 text-white px-2.5 py-0.5 rounded-full mb-3 text-xs font-medium">
                         <Thermometer className="h-3 w-3" />
@@ -1126,21 +1141,20 @@ function App() {
                       </div>
                       
                       {/* Simplified headline */}
-                      <h2 className="text-2xl font-black text-gray-900 leading-tight mb-3">
+                      <h2 className="text-2xl font-black text-gray-900 leading-tight mb-3" style={{ WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale' }}>
                         Stop Wasting Money on
-                        <span className="block text-2xl text-orange-600">
+                        <span className="block text-2xl text-orange-600 font-black">
                           High AC Bills
                         </span>
                       </h2>
                       
                       {/* Value proposition */}
                       <div className="text-center mb-3">
-                        <p className="text-base text-gray-700 font-medium">Cut your cooling costs by up to</p>
+                        <p className="text-base text-gray-700 font-medium" style={{ WebkitFontSmoothing: 'antialiased' }}>Cut your cooling costs by up to</p>
                         <div className="relative inline-block my-1 isolate">
                           <span className="text-5xl font-black mobile-hero-gradient-text">35%</span>
-                          <div className="absolute -inset-1 rounded-full mobile-hero-glow" />
                         </div>
-                        <p className="text-xs text-gray-600">With proper insulation</p>
+                        <p className="text-xs text-gray-600" style={{ WebkitFontSmoothing: 'antialiased' }}>With proper insulation</p>
                       </div>
                       
                       {/* Streamlined metrics card */}
@@ -1924,7 +1938,7 @@ function App() {
               <CardHeader className="bg-gradient-to-r from-gray-900 to-gray-800 text-white text-center py-8">
                 <CardTitle className="text-2xl lg:text-3xl font-bold">Free In-Home Consultation</CardTitle>
                 <CardDescription className="text-gray-300 text-base mt-2">
-                  Usually $150 value - FREE for a limited time
+                  Get expert advice at no cost
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 lg:p-8 bg-white">

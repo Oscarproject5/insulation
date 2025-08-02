@@ -90,7 +90,7 @@ body {
 
 /* Modern Hero Section */
 .hero-modern {
-  background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-light) 100%);
+  background: linear-gradient(135deg, var(--bg-white) 0%, rgba(250, 250, 250, 0.5) 100%);
   position: relative;
   overflow: hidden;
   width: 100%;
@@ -176,6 +176,7 @@ body {
   .hero-modern {
     min-height: auto;
     padding: 2rem 0 3rem 0; /* Reduced top padding since we use margin-top */
+    background: linear-gradient(135deg, #FFFFFF 0%, #FEF3E2 50%, #FFF7ED 100%); /* Subtle warm gradient */
   }
 }
 
@@ -1660,12 +1661,14 @@ html, body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-weight: 900;
   }
 
   .mobile-heat-wave {
-    background: radial-gradient(ellipse at center, rgba(239,68,68,0.15) 0%, transparent 70%);
-    filter: blur(20px);
-    transform: translateZ(0);
+    display: none; /* Disable heat wave to prevent blur issues */
   }
 
   .mobile-hero-glow {
@@ -1705,10 +1708,15 @@ html, body {
 
   .mobile-contain-layout-style {
     contain: layout style;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   .mobile-contain-layout-style-paint {
     contain: layout style paint;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   .mobile-contain-layout {
