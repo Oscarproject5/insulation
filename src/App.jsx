@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input.jsx'
 import { Textarea } from '@/components/ui/textarea.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight, Loader2, Facebook, Instagram, Globe, ChevronDown, ChevronUp, Camera, Quote } from 'lucide-react'
+import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight, Loader2, ChevronDown, ChevronUp, Camera, Quote } from 'lucide-react'
 import './App.css'
 import { sanitizeInput, sanitizePhone, sanitizeEmail, validateFormSecurity, formRateLimiter, getFingerprint, isSubmittedTooQuickly } from './utils/security.js'
 
@@ -2574,35 +2574,6 @@ function App() {
                   ))}
                 </div>
                 <span className="text-gray-400">4.9/5 Rating</span>
-              </div>
-              <div className="flex space-x-4 mt-4">
-                <a 
-                  href="https://www.facebook.com/rgvinsulation" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors"
-                  aria-label="Facebook"
-                >
-                  <Facebook className="h-5 w-5" />
-                </a>
-                <a 
-                  href="https://www.instagram.com/rgvinsulation" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors"
-                  aria-label="Instagram"
-                >
-                  <Instagram className="h-5 w-5" />
-                </a>
-                <a 
-                  href="https://g.page/rgvinsulation" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors"
-                  aria-label="Google Business"
-                >
-                  <Globe className="h-5 w-5" />
-                </a>
               </div>
             </div>
 
