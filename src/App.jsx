@@ -394,8 +394,10 @@ function App() {
       let currentY = 0
       
       const handleTouchStart = (e) => {
-        // Don't interfere with form elements
-        if (e.target.matches('input, textarea, select, button')) {
+        // Don't interfere with form elements or their parent containers
+        if (e.target.matches('input, textarea, select, button') || 
+            e.target.closest('.mobile-form-step') || 
+            e.target.closest('form')) {
           return;
         }
         
@@ -405,8 +407,10 @@ function App() {
       }
       
       const handleTouchMove = (e) => {
-        // Don't interfere with form elements
-        if (e.target.matches('input, textarea, select, button')) {
+        // Don't interfere with form elements or their parent containers
+        if (e.target.matches('input, textarea, select, button') || 
+            e.target.closest('.mobile-form-step') || 
+            e.target.closest('form')) {
           return;
         }
         
@@ -420,8 +424,10 @@ function App() {
       }
       
       const handleTouchEnd = (e) => {
-        // Don't interfere with form elements
-        if (e.target.matches('input, textarea, select, button')) {
+        // Don't interfere with form elements or their parent containers
+        if (e.target.matches('input, textarea, select, button') || 
+            e.target.closest('.mobile-form-step') || 
+            e.target.closest('form')) {
           return;
         }
         
@@ -734,6 +740,30 @@ function App() {
     setFormErrors({})
     setFormStep(step)
   }
+
+  // Ensure space key works on mobile inputs
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    const preventSpaceInterference = (e) => {
+      // If space key is pressed in an input or textarea, stop propagation
+      if (e.key === ' ' && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }
+    };
+    
+    // Use capture phase to handle before any other handlers
+    document.addEventListener('keydown', preventSpaceInterference, true);
+    document.addEventListener('keypress', preventSpaceInterference, true);
+    document.addEventListener('keyup', preventSpaceInterference, true);
+    
+    return () => {
+      document.removeEventListener('keydown', preventSpaceInterference, true);
+      document.removeEventListener('keypress', preventSpaceInterference, true);
+      document.removeEventListener('keyup', preventSpaceInterference, true);
+    };
+  }, [isMobile]);
 
   // FAQ Accordion Component
   const FAQAccordion = () => {
@@ -2084,15 +2114,6 @@ function App() {
                             className="w-full"
                             inputMode="text"
                             autoComplete="street-address"
-                            onTouchStart={(e) => e.stopPropagation()}
-                            onTouchMove={(e) => e.stopPropagation()}
-                            onTouchEnd={(e) => e.stopPropagation()}
-                            onKeyDown={(e) => {
-                              // Ensure space key works
-                              if (e.key === ' ') {
-                                e.stopPropagation();
-                              }
-                            }}
                             onInput={handleAddressChange}
                             spellCheck="false"
                             data-testid="address-input"
@@ -2129,6 +2150,7 @@ function App() {
                             placeholder="Tell us about your project"
                             rows={3}
                             className="w-full"
+                            spellCheck="true"
                           />
                           <div className="mobile-success-check">
                             <svg viewBox="0 0 52 52">
@@ -2195,6 +2217,15 @@ function App() {
                             autoComplete="name"
                             className={`w-full ${formErrors.name ? 'border-red-500' : ''}`}
                             disabled={isSubmitting}
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onTouchMove={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              // Ensure space key works
+                              if (e.key === ' ') {
+                                e.stopPropagation();
+                              }
+                            }}
                           />
                           {formErrors.name && (
                             <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
@@ -2213,6 +2244,15 @@ function App() {
                             autoComplete="tel"
                             className={`w-full ${formErrors.phone ? 'border-red-500' : ''}`}
                             disabled={isSubmitting}
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onTouchMove={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              // Ensure space key works for phone numbers
+                              if (e.key === ' ') {
+                                e.stopPropagation();
+                              }
+                            }}
                           />
                           {formErrors.phone && (
                             <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>
@@ -2234,6 +2274,15 @@ function App() {
                             autoComplete="email"
                             className={`w-full ${formErrors.email ? 'border-red-500' : ''}`}
                             disabled={isSubmitting}
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onTouchMove={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              // Ensure space key works (though spaces in email should be rare)
+                              if (e.key === ' ') {
+                                e.stopPropagation();
+                              }
+                            }}
                           />
                           {formErrors.email && (
                             <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
@@ -2301,6 +2350,16 @@ function App() {
                           rows={4}
                           className="w-full"
                           disabled={isSubmitting}
+                          onTouchStart={(e) => e.stopPropagation()}
+                          onTouchMove={(e) => e.stopPropagation()}
+                          onTouchEnd={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => {
+                            // Ensure space key works
+                            if (e.key === ' ') {
+                              e.stopPropagation();
+                            }
+                          }}
+                          spellCheck="true"
                         />
                       </div>
 
