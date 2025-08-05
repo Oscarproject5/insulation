@@ -719,6 +719,12 @@ function App() {
         }
       }
       
+      if (formStep === 2) {
+        if (!formData.serviceType.trim()) {
+          errors.serviceType = 'Please select a service type'
+        }
+      }
+      
       if (Object.keys(errors).length > 0) {
         setFormErrors(errors)
         return
@@ -2058,13 +2064,17 @@ function App() {
                             name="serviceType"
                             value={formData.serviceType}
                             onChange={handleInputChange}
-                            className="w-full p-3 border border-gray-300 rounded-lg"
+                            className={`w-full p-3 border border-gray-300 rounded-lg ${!formData.serviceType ? 'border-red-500' : ''}`}
+                            required
                           >
-                            <option value="">Select Service</option>
+                            <option value="">Select Service *</option>
                             <option value="spray-foam">Spray Foam</option>
                             <option value="blown-in">Blown-In</option>
                             <option value="attic">Attic Insulation</option>
                           </select>
+                          {!formData.serviceType && (
+                            <p className="text-red-500 text-xs mt-1">Please select a service type</p>
+                          )}
                           <Input
                             type="text"
                             name="address"
