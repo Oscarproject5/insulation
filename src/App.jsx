@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight, Loader2, ChevronDown, ChevronUp, Camera, Quote } from 'lucide-react'
 import './App.css'
-import { sanitizeInput, sanitizePhone, sanitizeEmail, validateFormSecurity, formRateLimiter, getFingerprint, isSubmittedTooQuickly } from './utils/security.js'
+import { sanitizeInput, sanitizeAddress, sanitizePhone, sanitizeEmail, validateFormSecurity, formRateLimiter, getFingerprint, isSubmittedTooQuickly } from './utils/security.js'
 
 // Import images
 import sprayFoamHeroImage from './assets/spray-foam-installation-hero.jpg'
@@ -394,12 +394,22 @@ function App() {
       let currentY = 0
       
       const handleTouchStart = (e) => {
+        // Don't interfere with form elements
+        if (e.target.matches('input, textarea, select, button')) {
+          return;
+        }
+        
         if (window.scrollY === 0) {
           startY = e.touches[0].clientY
         }
       }
       
       const handleTouchMove = (e) => {
+        // Don't interfere with form elements
+        if (e.target.matches('input, textarea, select, button')) {
+          return;
+        }
+        
         if (startY > 0) {
           currentY = e.touches[0].clientY
           const diff = currentY - startY
@@ -409,7 +419,12 @@ function App() {
         }
       }
       
-      const handleTouchEnd = () => {
+      const handleTouchEnd = (e) => {
+        // Don't interfere with form elements
+        if (e.target.matches('input, textarea, select, button')) {
+          return;
+        }
+        
         handlePullToRefresh()
         startY = 0
         currentY = 0
@@ -443,9 +458,11 @@ function App() {
     
     switch(name) {
       case 'name':
-      case 'address':
       case 'message':
         sanitizedValue = sanitizeInput(value);
+        break;
+      case 'address':
+        sanitizedValue = sanitizeAddress(value);
         break;
       case 'phone':
         sanitizedValue = sanitizePhone(value);
@@ -464,6 +481,34 @@ function App() {
     const newFormData = {
       ...formData,
       [name]: sanitizedValue
+    };
+    
+    setFormData(newFormData);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('rgv_form_data', JSON.stringify(newFormData));
+  }
+
+  // Special handler for address field to ensure spaces work properly
+  const handleAddressChange = (e) => {
+    const value = e.target.value;
+    
+    // Start timing when user begins filling form
+    if (!formStartTime) {
+      setFormStartTime(Date.now());
+    }
+    
+    // Minimal sanitization for address - preserve spaces and common address characters
+    const sanitizedValue = value
+      .replace(/<[^>]*>?/gm, '') // Remove HTML tags
+      .replace(/[<>\"']/g, '') // Remove dangerous characters but keep spaces, commas, periods
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/on\w+\s*=/gi, '') // Remove inline event handlers
+      .substring(0, 200); // Reasonable length limit for addresses
+    
+    const newFormData = {
+      ...formData,
+      address: sanitizedValue
     };
     
     setFormData(newFormData);
@@ -1946,6 +1991,15 @@ function App() {
                   <form name="quote-form-mobile" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" onSubmit={handleSubmit} className="space-y-5">
                     <input type="hidden" name="form-name" value="quote-form-mobile" />
                     <input type="hidden" name="bot-field" />
+                    
+                    {/* Hidden inputs to ensure all form data is submitted regardless of current step */}
+                    <input type="hidden" name="name" value={formData.name} />
+                    <input type="hidden" name="phone" value={formData.phone} />
+                    <input type="hidden" name="email" value={formData.email} />
+                    <input type="hidden" name="serviceType" value={formData.serviceType} />
+                    <input type="hidden" name="address" value={formData.address} />
+                    <input type="hidden" name="message" value={formData.message} />
+                    
                     {/* Mobile Progressive Form */}
                     <div className="mobile-form-progress">
                       <div className={`mobile-form-progress-item ${formStep >= 1 ? 'active' : ''}`} />
@@ -2015,9 +2069,23 @@ function App() {
                             type="text"
                             name="address"
                             value={formData.address}
-                            onChange={handleInputChange}
+                            onChange={handleAddressChange}
                             placeholder="Property Address"
                             className="w-full"
+                            inputMode="text"
+                            autoComplete="street-address"
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onTouchMove={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              // Ensure space key works
+                              if (e.key === ' ') {
+                                e.stopPropagation();
+                              }
+                            }}
+                            onInput={handleAddressChange}
+                            spellCheck="false"
+                            data-testid="address-input"
                           />
                           <div className="flex gap-3">
                             <Button 
@@ -2190,11 +2258,24 @@ function App() {
                           type="text"
                           name="address"
                           value={formData.address}
-                          onChange={handleInputChange}
+                          onChange={handleAddressChange}
                           placeholder="Street address, City, TX"
                           autoComplete="street-address"
                           className="w-full"
                           disabled={isSubmitting}
+                          inputMode="text"
+                          onTouchStart={(e) => e.stopPropagation()}
+                          onTouchMove={(e) => e.stopPropagation()}
+                          onTouchEnd={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => {
+                            // Ensure space key works
+                            if (e.key === ' ') {
+                              e.stopPropagation();
+                            }
+                          }}
+                          onInput={handleAddressChange}
+                          spellCheck="false"
+                          data-testid="address-input-desktop"
                         />
                       </div>
 
