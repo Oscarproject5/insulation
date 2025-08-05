@@ -27,6 +27,20 @@ export const sanitizeInput = (input) => {
     .substring(0, 1000); // Limit length
 };
 
+// Specialized sanitization for address fields that preserves spaces and common address characters
+export const sanitizeAddress = (input) => {
+  if (!input) return '';
+  
+  return String(input)
+    .replace(/<[^>]*>?/gm, '') // Remove HTML tags
+    .replace(/[<>\"']/g, '') // Remove dangerous characters but keep spaces, commas, periods, hyphens
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+\s*=/gi, '') // Remove inline event handlers
+    .replace(/^\s+|\s+$/g, '') // Trim leading/trailing spaces but preserve internal spaces
+    .replace(/\s{2,}/g, ' ') // Replace multiple spaces with single space
+    .substring(0, 200); // Reasonable length limit for addresses
+};
+
 // Validate and sanitize phone number
 export const sanitizePhone = (phone) => {
   return String(phone).replace(/[^\d\s\-\(\)\.]/g, '');
