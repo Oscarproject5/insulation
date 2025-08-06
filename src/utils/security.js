@@ -18,8 +18,9 @@ export const sanitizeHTML = (dirty) => {
 export const sanitizeInput = (input) => {
   if (!input) return '';
   
+  // Don't trim during input to preserve spaces as user types
+  // Only sanitize dangerous content
   return String(input)
-    .trim()
     .replace(/<[^>]*>?/gm, '') // Remove HTML tags
     .replace(/[<>\"']/g, '') // Remove dangerous characters
     .replace(/javascript:/gi, '') // Remove javascript: protocol

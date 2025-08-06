@@ -741,28 +741,28 @@ function App() {
     setFormStep(step)
   }
 
-  // Ensure space key works on mobile inputs
+  // Fix for space key on mobile inputs - removed custom handling to let native behavior work
   useEffect(() => {
     if (!isMobile) return;
     
-    const preventSpaceInterference = (e) => {
-      // If space key is pressed in an input or textarea, stop propagation
+    // Remove the custom space key handler that was interfering with native input
+    // Mobile keyboards should handle spaces naturally without intervention
+    
+    // Optional: Add logging for debugging if space issues persist
+    const handleDebugKey = (e) => {
       if (e.key === ' ' && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
-        e.stopPropagation();
-        e.stopImmediatePropagation();
+        console.log('Space key detected in:', e.target.name, 'Value:', e.target.value);
       }
     };
     
-    // Use capture phase to handle before any other handlers
-    document.addEventListener('keydown', preventSpaceInterference, true);
-    document.addEventListener('keypress', preventSpaceInterference, true);
-    document.addEventListener('keyup', preventSpaceInterference, true);
-    
-    return () => {
-      document.removeEventListener('keydown', preventSpaceInterference, true);
-      document.removeEventListener('keypress', preventSpaceInterference, true);
-      document.removeEventListener('keyup', preventSpaceInterference, true);
-    };
+    // Only attach for debugging, don't interfere with input
+    if (window.location.search.includes('debug=true')) {
+      document.addEventListener('keyup', handleDebugKey, false);
+      
+      return () => {
+        document.removeEventListener('keyup', handleDebugKey, false);
+      };
+    }
   }, [isMobile]);
 
   // FAQ Accordion Component
@@ -2055,6 +2055,10 @@ function App() {
                               onChange={handleInputChange}
                               placeholder="Full Name"
                               autoComplete="name"
+                              autoCapitalize="words"
+                              autoCorrect="off"
+                              spellCheck="false"
+                              inputMode="text"
                               className={`w-full ${formErrors.name ? 'border-red-500' : ''}`}
                             />
                             {formErrors.name && (
@@ -2220,12 +2224,6 @@ function App() {
                             onTouchStart={(e) => e.stopPropagation()}
                             onTouchMove={(e) => e.stopPropagation()}
                             onTouchEnd={(e) => e.stopPropagation()}
-                            onKeyDown={(e) => {
-                              // Ensure space key works
-                              if (e.key === ' ') {
-                                e.stopPropagation();
-                              }
-                            }}
                           />
                           {formErrors.name && (
                             <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
@@ -2247,12 +2245,6 @@ function App() {
                             onTouchStart={(e) => e.stopPropagation()}
                             onTouchMove={(e) => e.stopPropagation()}
                             onTouchEnd={(e) => e.stopPropagation()}
-                            onKeyDown={(e) => {
-                              // Ensure space key works for phone numbers
-                              if (e.key === ' ') {
-                                e.stopPropagation();
-                              }
-                            }}
                           />
                           {formErrors.phone && (
                             <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>
@@ -2277,12 +2269,6 @@ function App() {
                             onTouchStart={(e) => e.stopPropagation()}
                             onTouchMove={(e) => e.stopPropagation()}
                             onTouchEnd={(e) => e.stopPropagation()}
-                            onKeyDown={(e) => {
-                              // Ensure space key works (though spaces in email should be rare)
-                              if (e.key === ' ') {
-                                e.stopPropagation();
-                              }
-                            }}
                           />
                           {formErrors.email && (
                             <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
@@ -2326,12 +2312,6 @@ function App() {
                           onTouchStart={(e) => e.stopPropagation()}
                           onTouchMove={(e) => e.stopPropagation()}
                           onTouchEnd={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => {
-                            // Ensure space key works
-                            if (e.key === ' ') {
-                              e.stopPropagation();
-                            }
-                          }}
                           onInput={handleAddressChange}
                           spellCheck="false"
                           data-testid="address-input-desktop"
@@ -2353,12 +2333,6 @@ function App() {
                           onTouchStart={(e) => e.stopPropagation()}
                           onTouchMove={(e) => e.stopPropagation()}
                           onTouchEnd={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => {
-                            // Ensure space key works
-                            if (e.key === ' ') {
-                              e.stopPropagation();
-                            }
-                          }}
                           spellCheck="true"
                         />
                       </div>
