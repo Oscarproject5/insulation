@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import App from './App' // Your existing homepage
 import ServicesOverview from './pages/ServicesOverview'
 import LocationsOverview from './pages/LocationsOverview'
+import FloatingCallButton from './components/common/FloatingCallButton'
 
 // Area Pages
 import Brownsville from './pages/areas/Brownsville'
@@ -63,6 +64,9 @@ const AppRouter = () => {
       {/* <Route path="/services" element={<Services />} /> */}
       {/* <Route path="/areas" element={<Areas />} /> */}
     </Routes>
+    
+    {/* Floating Call Button - appears on all pages */}
+    <FloatingCallButton />
     </>
   )
 }
