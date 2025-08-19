@@ -13,7 +13,7 @@ export const sendEmailWithEmailJS = async (formData) => {
     
     // Prepare template parameters
     const templateParams = {
-      to_name: 'RGV Insulation Team',
+      to_name: 'Valley Insulation Team',
       from_name: formData.name,
       from_phone: formData.phone,
       from_email: formData.email || 'Not provided',

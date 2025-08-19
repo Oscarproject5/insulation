@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Input } from '@/components/ui/input.jsx'
@@ -7,6 +8,8 @@ import { Badge } from '@/components/ui/badge.jsx'
 import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight, Loader2, ChevronDown, ChevronUp, Camera, Quote } from 'lucide-react'
 import './App.css'
 import { sanitizeInput, sanitizeAddress, sanitizePhone, sanitizeEmail, validateFormSecurity, formRateLimiter, getFingerprint, isSubmittedTooQuickly } from './utils/security.js'
+import FloatingMenu from './components/common/FloatingMenu.jsx'
+import PageHeader from './components/layout/PageHeader.jsx'
 
 // Import images
 import sprayFoamHeroImage from './assets/spray-foam-installation-hero.jpg'
@@ -200,6 +203,10 @@ function App() {
     todaysHigh: 89,
     isNight: false
   })
+
+  // Dropdown states
+  const [showServicesDropdown, setShowServicesDropdown] = useState(false)
+  const [showLocationsDropdown, setShowLocationsDropdown] = useState(false)
 
   // Memoized calculations
   const temperatureBarWidth = useMemo(() => 
@@ -477,8 +484,16 @@ function App() {
         sanitizedValue = sanitizeEmail(value);
         break;
       case 'serviceType':
-        // Service type is from select, just limit length
-        sanitizedValue = value.substring(0, 50);
+        // Service type is from select, just use the value directly
+        sanitizedValue = value;
+        // Clear the error for this field when user selects a value
+        if (value && formErrors.serviceType) {
+          setFormErrors(prev => {
+            const newErrors = {...prev};
+            delete newErrors.serviceType;
+            return newErrors;
+          });
+        }
         break;
       default:
         sanitizedValue = sanitizeInput(value);
@@ -726,7 +741,7 @@ function App() {
       }
       
       if (formStep === 2) {
-        if (!formData.serviceType.trim()) {
+        if (!formData.serviceType || formData.serviceType.trim() === '') {
           errors.serviceType = 'Please select a service type'
         }
       }
@@ -928,7 +943,7 @@ function App() {
                 <p>By requesting our services, you agree to these terms. Valley Insulation Pros provides professional insulation installation services throughout the Rio Grande Valley.</p>
                 
                 <h3 className="text-lg font-bold mt-6">Service Warranty</h3>
-                <p>We provide a lifetime warranty on spray foam insulation installations and manufacturer warranties on all materials used. Warranty is valid for original purchaser only.</p>
+                <p>We provide manufacturer warranties on all materials used. Warranty is valid for original purchaser only.</p>
                 
                 <h3 className="text-lg font-bold mt-6">Payment Terms</h3>
                 <p>Payment is due upon completion of work unless other arrangements have been made. We accept cash, check, and major credit cards. Financing available with approved credit.</p>
@@ -993,160 +1008,7 @@ function App() {
       <TermsModal />
       
       {/* Header with Integrated Navigation */}
-      <header className="bg-white fixed top-0 left-0 right-0 z-50 shadow-lg">
-        {/* Main Header */}
-        <div className={`container mx-auto px-4 lg:px-8 ${isMobile ? 'py-1' : 'py-2'}`}>
-          <div className="flex items-center justify-between relative">
-            
-            {/* Brand */}
-            <div className="flex items-center gap-3">
-              <div className={`${isMobile ? 'bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-lg shadow-md' : 'bg-gradient-to-br from-orange-500 to-orange-600 p-2.5 rounded-lg shadow-md'}`}>
-                <Shield className={`${isMobile ? 'h-6 w-6' : 'h-7 w-7'} text-white`} />
-              </div>
-              {/* Decorative separator - desktop only */}
-              {!isMobile && (
-                <div className="hidden lg:block absolute left-[260px] top-1/2 -translate-y-1/2 w-[1px] h-12 bg-gradient-to-b from-transparent via-gray-200 to-transparent" />
-              )}
-              {!isMobile && (
-                <button 
-                  onClick={() => {
-                    window.scrollTo({top: 0, behavior: 'smooth'});
-                  }}
-                  className="hover:opacity-80 transition-opacity"
-                >
-                  <h1 className="text-lg font-bold text-gray-900">Valley Insulation Pros</h1>
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <span>Licensed & Insured</span>
-                    <span className="text-xs">•</span>
-                    <div className="flex items-center gap-1">
-                      <div className="flex text-yellow-500">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-2.5 w-2.5 fill-current" style={{ animationDelay: `${i * 0.1}s` }} />
-                        ))}
-                      </div>
-                      <span className="font-semibold">4.9</span>
-                    </div>
-                  </div>
-                </button>
-              )}
-              {isMobile && (
-                <div>
-                  <h1 className="text-base font-bold text-gray-900">Valley Insulation<br/>Pros</h1>
-                  <div className="flex items-center gap-1 text-xs text-gray-600">
-                    <span>Licensed &</span>
-                    <br className="hidden" />
-                    <span>Insured</span>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Desktop Navigation */}
-            {!isMobile && (
-              <nav className="hidden lg:flex items-center gap-8">
-                <button 
-                  onClick={() => {
-                    const element = document.getElementById('services');
-                    if (element) {
-                      const yOffset = -80;
-                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                      window.scrollTo({top: y, behavior: 'smooth'});
-                    }
-                  }}
-                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
-                >
-                  Services
-                </button>
-                <button 
-                  onClick={() => {
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const yOffset = -80;
-                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                      window.scrollTo({top: y, behavior: 'smooth'});
-                    }
-                  }}
-                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
-                >
-                  About
-                </button>
-                <button 
-                  onClick={() => {
-                    const element = document.getElementById('reviews');
-                    if (element) {
-                      const yOffset = -80;
-                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                      window.scrollTo({top: y, behavior: 'smooth'});
-                    }
-                  }}
-                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
-                >
-                  Reviews
-                </button>
-                <button 
-                  onClick={() => {
-                    const element = document.getElementById('contact');
-                    if (element) {
-                      const yOffset = -80;
-                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                      window.scrollTo({top: y, behavior: 'smooth'});
-                    }
-                  }}
-                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
-                >
-                  Contact
-                </button>
-                <button 
-                  onClick={() => {
-                    const element = document.getElementById('quote');
-                    if (element) {
-                      const yOffset = -80;
-                      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                      window.scrollTo({top: y, behavior: 'smooth'});
-                    }
-                  }}
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg"
-                >
-                  Get Free Quote
-                </button>
-              </nav>
-            )}
-            
-            {/* Phone Number - THE HERO */}
-            <div className="text-right relative">
-              {/* Decorative accent */}
-              {!isMobile && (
-                <div className="hidden lg:block absolute -left-20 top-1/2 -translate-y-1/2 w-12 h-12 opacity-10">
-                  <div className="w-full h-full bg-gradient-to-br from-orange-500 to-orange-600 rounded-full animate-pulse" />
-                </div>
-              )}
-              <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 mb-1 flex items-center gap-2 justify-end`}>
-                {!isMobile && (
-                  <div className="inline-flex items-center gap-1 mr-3">
-                    <Thermometer className="h-4 w-4 text-red-500" />
-                    <span className="font-semibold text-red-600">{headerState.currentTemp}°F</span>
-                  </div>
-                )}
-                <span>Call for FREE Quote</span>
-                {!isMobile && (
-                  <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold animate-pulse">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                    Available Now
-                  </span>
-                )}
-              </div>
-              <a 
-                href="tel:+19568540899" 
-                className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} font-black text-orange-600 hover:text-orange-700 block relative`}
-                onClick={() => window.gtag_report_conversion()}
-              >
-                (956) 854-0899
-              </a>
-            </div>
-          </div>
-        </div>
-        
-      </header>
+      <PageHeader />
 
       {/* No spacer needed - hero section will handle padding */}
 
@@ -1438,10 +1300,13 @@ function App() {
                       </div>
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span className="text-xs text-gray-700">Lifetime warranty</span>
+                        <span className="text-xs text-gray-700">Manufacturer warranty</span>
                       </div>
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm"
+                      onClick={() => handleTabClick('quote')}
+                    >
                       Get Quote <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
@@ -1468,9 +1333,11 @@ function App() {
                         <span className="text-xs text-gray-700">Eco-friendly</span>
                       </div>
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm">
-                      Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+                    <Link to="/services/blown-in" className="block w-full">
+                      <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm">
+                        Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
                   </div>
 
                   {/* Mobile Service Card 3 */}
@@ -1495,7 +1362,10 @@ function App() {
                         <span className="text-xs text-gray-700">Heat reduction</span>
                       </div>
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white text-sm">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white text-sm"
+                      onClick={() => handleTabClick('quote')}
+                    >
                       Schedule Audit <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
@@ -1557,9 +1427,14 @@ function App() {
                     <div className="bg-green-100 p-1.5 rounded-full">
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     </div>
-                    <span className="text-gray-700 font-medium">Lifetime warranty</span>
+                    <span className="text-gray-700 font-medium">Quality guarantee</span>
                   </li>
                 </ul>
+                <Link to="/services/spray-foam" className="block mt-4">
+                  <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white">
+                    Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -1605,6 +1480,11 @@ function App() {
                     <span className="text-gray-700 font-medium">Great value for money</span>
                   </li>
                 </ul>
+                <Link to="/services/blown-in" className="block mt-4">
+                  <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                    Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -1650,6 +1530,11 @@ function App() {
                     <span className="text-gray-700 font-medium">Energy audit included</span>
                   </li>
                 </ul>
+                <Link to="/services/attic" className="block mt-4">
+                  <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white">
+                    Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
               </div>
@@ -1821,7 +1706,7 @@ function App() {
                     <Award className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold mb-1">Lifetime Warranty</h4>
+                    <h4 className="text-lg font-semibold mb-1">Quality Guarantee</h4>
                     <p className="text-sm text-gray-600">
                       We stand behind our work with comprehensive warranties. Your investment is protected 
                       for as long as you own your home.
@@ -1944,7 +1829,7 @@ function App() {
               </div>
               <div className="flex items-center gap-2">
                 <Award className="h-6 w-6 text-orange-600" />
-                <span className="font-semibold text-gray-800">A+ BBB Rating</span>
+                <span className="font-semibold text-gray-800">15+ Years Experience</span>
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="h-6 w-6 text-blue-600" />
@@ -2098,16 +1983,23 @@ function App() {
                             name="serviceType"
                             value={formData.serviceType}
                             onChange={handleInputChange}
-                            className={`w-full p-3 border border-gray-300 rounded-lg ${!formData.serviceType ? 'border-red-500' : ''}`}
+                            onInput={handleInputChange}
+                            className={`w-full p-3 border rounded-lg appearance-none bg-white ${
+                              formErrors.serviceType ? 'border-red-500' : 'border-gray-300'
+                            } focus:outline-none focus:ring-2 focus:ring-orange-500`}
                             required
+                            style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
                           >
                             <option value="">Select Service *</option>
-                            <option value="spray-foam">Spray Foam</option>
-                            <option value="blown-in">Blown-In</option>
+                            <option value="spray-foam">Spray Foam Insulation</option>
+                            <option value="blown-in">Blown-In Insulation</option>
                             <option value="attic">Attic Insulation</option>
+                            <option value="wall">Wall Insulation</option>
+                            <option value="soundproofing">Soundproofing</option>
+                            <option value="commercial">Commercial Insulation</option>
                           </select>
-                          {!formData.serviceType && (
-                            <p className="text-red-500 text-xs mt-1">Please select a service type</p>
+                          {formErrors.serviceType && (
+                            <p className="text-red-500 text-xs mt-1">{formErrors.serviceType}</p>
                           )}
                           <Input
                             type="text"
@@ -2421,7 +2313,7 @@ function App() {
                         </div>
                         <div className="flex items-center gap-3">
                           <CheckCircle className="h-5 w-5 text-green-400" />
-                          <span>Lifetime warranty</span>
+                          <span>Quality guarantee</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <CheckCircle className="h-5 w-5 text-green-400" />
@@ -2504,7 +2396,6 @@ function App() {
           )}
 
 
-
           {/* Mobile Bottom Navigation */}
           <div className="mobile-tab-bar">
             <div 
@@ -2543,6 +2434,9 @@ function App() {
           {/* Mobile Lead Widget */}
           <MobileLeadWidget />
 
+          {/* Floating Navigation Menu */}
+          <FloatingMenu />
+
           {/* Mobile Floating Phone Button */}
           <a 
             href="tel:+19568543626" 
@@ -2556,124 +2450,6 @@ function App() {
       )}
 
 
-      {/* Blog/Resources Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Energy Saving Resources
-            </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Tips and guides to maximize your home's energy efficiency in the Valley heat
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Resource 1 */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Thermometer className="h-6 w-6 text-orange-600" />
-                </div>
-                <CardTitle className="text-xl">Summer Cooling Tips</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Set AC to 78°F when home, 85°F when away</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Use ceiling fans to circulate cool air</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Close blinds during peak sun hours</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Seal air leaks around windows and doors</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-            
-            {/* Resource 2 */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Home className="h-6 w-6 text-blue-600" />
-                </div>
-                <CardTitle className="text-xl">Insulation Maintenance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Inspect attic insulation annually</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Look for signs of moisture or pest damage</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Check for compressed or settled insulation</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Ensure attic ventilation is unobstructed</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-            
-            {/* Resource 3 */}
-            <Card className="shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Zap className="h-6 w-6 text-green-600" />
-                </div>
-                <CardTitle className="text-xl">Energy Audit Checklist</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Check for drafts around windows/doors</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Measure insulation depth in attic</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Test AC efficiency and age</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">Review utility bills for usage patterns</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="mt-12 text-center">
-            <p className="text-gray-600 mb-6">
-              Want a professional energy audit? We'll inspect your home for FREE!
-            </p>
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white"
-              onClick={() => document.getElementById('quote')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              Schedule Free Energy Audit
-            </Button>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer id="contact" className="bg-gray-900 text-white py-10">
@@ -2703,54 +2479,113 @@ function App() {
 
             <div>
               <h5 className="text-base font-semibold mb-3">Services</h5>
-              <ul className="space-y-1.5 text-sm text-gray-400">
-                <li>Spray Foam Insulation</li>
-                <li>Blown-In Insulation</li>
-                <li>Attic Insulation</li>
-                <li>Energy Audits</li>
-                <li>Radiant Barriers</li>
-                <li>Commercial Insulation</li>
+              <ul className="space-y-1.5 text-sm">
+                <li>
+                  <Link to="/services/spray-foam" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Spray Foam Insulation
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/services/blown-in" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Blown-In Insulation
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/services/attic" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Attic Insulation
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/services/wall" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Wall Insulation
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/services/commercial" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Commercial Insulation
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/services" className="text-orange-400 hover:text-orange-300 font-semibold">
+                    View All →
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div>
               <h5 className="text-base font-semibold mb-3">Service Areas</h5>
-              <ul className="space-y-1.5 text-sm text-gray-400">
-                <li>McAllen & Edinburg</li>
-                <li>Brownsville & Harlingen</li>
-                <li>Mission & Pharr</li>
-                <li>Weslaco & Mercedes</li>
-                <li>Rio Grande City</li>
-                <li>All of RGV</li>
+              <ul className="space-y-1.5 text-sm">
+                <li>
+                  <Link to="/areas/mcallen" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    McAllen
+                  </Link>
+                  <span className="text-gray-400"> & </span>
+                  <Link to="/areas/edinburg" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Edinburg
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/areas/brownsville" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Brownsville
+                  </Link>
+                  <span className="text-gray-400"> & </span>
+                  <Link to="/areas/harlingen" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Harlingen
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/areas/mission" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Mission
+                  </Link>
+                  <span className="text-gray-400"> & </span>
+                  <Link to="/areas/pharr" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Pharr
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/locations" className="text-orange-400 hover:text-orange-300 font-semibold">
+                    All Locations →
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div>
-              <h5 className="text-base font-semibold mb-3">Contact Info</h5>
-              <div className="space-y-2 text-sm text-gray-400">
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4" />
-                  <span>(956) 854-0899</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4" />
-                  <span>info@valleyinsulationpros.com</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>Serving all of Rio Grande Valley, TX</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4" />
-                  <span>Mon-Sat: 7AM-7PM</span>
-                </div>
-              </div>
+              <h5 className="text-base font-semibold mb-3">Quick Links</h5>
+              <ul className="space-y-1.5 text-sm">
+                <li>
+                  <Link to="/quote" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Get Free Quote
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/about" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <a href="#testimonials" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    Customer Reviews
+                  </a>
+                </li>
+                <li>
+                  <a href="#faq" className="text-gray-400 hover:text-orange-400 transition-colors">
+                    FAQs
+                  </a>
+                </li>
+                <li>
+                  <a href="tel:9568540899" className="text-orange-400 hover:text-orange-300 font-semibold">
+                    Call (956) 854-0899
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
 
           <div className="border-t border-gray-800 mt-6 pt-6 text-center text-xs text-gray-400">
             <p>&copy; 2024 Valley Insulation Pros. All rights reserved. Licensed & Insured in Texas.</p>
-            <p className="mt-1">Emergency service • Free estimates • Lifetime warranty</p>
+            <p className="mt-1">Emergency service • Free estimates • Quality guarantee</p>
             <div className="mt-3 space-x-4">
               <button 
                 onClick={() => setShowPrivacyModal(true)}

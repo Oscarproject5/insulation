@@ -1,0 +1,67 @@
+/* Mobile Form Progress Bar */
+.mobile-form-progress {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 2rem;
+}
+
+.mobile-form-progress-item {
+  flex: 1;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.mobile-form-progress-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, #f97316, #ef4444);
+  animation: progressFill 0.6s ease forwards;
+}
+
+/* Mobile Form Step Animation */
+.mobile-form-step {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: formStepIn 0.4s ease forwards;
+}
+
+@keyframes formStepIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progressFill {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .mobile-form-step input,
+  .mobile-form-step select,
+  .mobile-form-step textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .mobile-form-step label {
+    font-size: 14px;
+  }
+  
+  .mobile-form-step h3 {
+    margin-bottom: 1rem;
+  }
+}
