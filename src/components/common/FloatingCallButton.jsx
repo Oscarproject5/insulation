@@ -1,8 +1,13 @@
 import React from 'react'
 import { Phone } from 'lucide-react'
 import { siteConfig } from '../../data/siteConfig'
+import { trackPhoneConversion } from '../../utils/conversionTracking'
 
 const FloatingCallButton = () => {
+  const handlePhoneClick = () => {
+    trackPhoneConversion(siteConfig.company.phone);
+  };
+
   return (
     <>
       {/* Floating Call Button - Mobile Only */}
@@ -10,6 +15,7 @@ const FloatingCallButton = () => {
         href={`tel:${siteConfig.company.phoneRaw}`}
         className="lg:hidden fixed bottom-6 right-6 z-50 bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 animate-pulse-slow"
         aria-label="Call us"
+        onClick={handlePhoneClick}
       >
         <Phone className="h-6 w-6" fill="currentColor" />
       </a>
