@@ -15,6 +15,7 @@ import EnhancedHeader from '../components/layout/EnhancedHeader';
 import PageFooter from '../components/layout/PageFooter';
 import MobileBottomNav from '../components/common/MobileBottomNav';
 import { validateFormData, sanitizeInput, formatPhoneNumber, sendEmailWithEmailJS } from '../services/emailService';
+import { trackFormConversion } from '../utils/conversionTracking';
 
 const Quote = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,6 +106,9 @@ const Quote = () => {
       const result = await sendEmailWithEmailJS(formData);
       
       if (result.success) {
+        // Track conversion with enhanced data for Google Ads
+        trackFormConversion(formData);
+        
         setSubmitStatus('success');
         // Reset form after successful submission
         setTimeout(() => {

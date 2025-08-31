@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge.jsx'
 import { Phone, Mail, MapPin, Star, Shield, Clock, Thermometer, CheckCircle, Users, Award, Zap, Home, Sparkles, FileText, MessageCircle, X, ArrowRight, Loader2, ChevronDown, ChevronUp, Camera, Quote } from 'lucide-react'
 import './App.css'
 import { sanitizeInput, sanitizeAddress, sanitizePhone, sanitizeEmail, validateFormSecurity, formRateLimiter, getFingerprint, isSubmittedTooQuickly } from './utils/security.js'
+import { trackFormConversion, trackPhoneConversion } from './utils/conversionTracking.js'
 import FloatingMenu from './components/common/FloatingMenu.jsx'
 import PageHeader from './components/layout/PageHeader.jsx'
 
@@ -618,10 +619,8 @@ function App() {
         message: '¡Gracias! We will contact you within 24 hours for your free estimate.'
       })
       
-      // Track conversion for Google Ads
-      if (window.gtag_report_conversion) {
-        window.gtag_report_conversion();
-      }
+      // Track conversion with enhanced data for Google Ads
+      trackFormConversion(formData);
       
       // Reset form but keep name/phone/email for future visits
       const resetData = {
@@ -1180,7 +1179,7 @@ function App() {
                       size="lg" 
                       className="btn-primary mobile-ripple px-8 py-4 text-base font-semibold shadow-xl flex items-center justify-center"
                       onClick={() => {
-                        window.gtag_report_conversion('tel:+19568540899');
+                        trackPhoneConversion('(956) 854-0899');
                       }}
                     >
                       <Phone className="mr-2 h-4 w-4" />
@@ -2442,7 +2441,7 @@ function App() {
             href="tel:+19568540899" 
             className="mobile-float-phone lg:hidden mobile-touch"
             aria-label="Call us now"
-            onClick={() => window.gtag_report_conversion()}
+            onClick={() => trackPhoneConversion('(956) 854-0899')}
           >
             <Phone />
           </a>

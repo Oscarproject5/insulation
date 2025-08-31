@@ -59,7 +59,11 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'AW-17335802483');
+      
+      // Enable enhanced conversions
+      gtag('config', 'AW-17335802483', {
+        'allow_enhanced_conversions': true
+      });
       
       // Phone conversion tracking
       gtag('config', 'AW-17335802483/r6IPCNyJroobEPO0rcpA', {
