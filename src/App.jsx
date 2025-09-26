@@ -1005,7 +1005,8 @@ function App() {
       {/* Modals */}
       <PrivacyModal />
       <TermsModal />
-      
+
+
       {/* Header with Integrated Navigation */}
       <PageHeader />
 
