@@ -11,6 +11,7 @@ import { sanitizeInput, sanitizeAddress, sanitizePhone, sanitizeEmail, validateF
 import { trackFormConversion, trackPhoneConversion } from './utils/conversionTracking.js'
 import FloatingMenu from './components/common/FloatingMenu.jsx'
 import PageHeader from './components/layout/PageHeader.jsx'
+import GallerySection from './components/common/GallerySection.jsx'
 
 // Import images
 import sprayFoamHeroImage from './assets/spray-foam-installation-hero.jpg'
@@ -1652,6 +1653,14 @@ function App() {
           </div>
         </section>
       )}
+
+      {/* Our Work Gallery */}
+      <GallerySection
+        title="Our Professional Work"
+        subtitle="See our completed insulation projects across the Rio Grande Valley"
+        maxImages={6}
+        className="bg-gradient-to-b from-white to-gray-50"
+      />
 
       {/* Why Choose Us Section */}
       <section id="about" className="py-16">
