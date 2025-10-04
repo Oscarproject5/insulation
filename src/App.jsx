@@ -1158,6 +1158,10 @@ function App() {
                         <Clock className="h-3.5 w-3.5 text-blue-600" />
                         <span>Same Day Service</span>
                       </div>
+                      <div className="flex items-center gap-0.5">
+                        <CheckCircle className="h-3.5 w-3.5 text-purple-600" />
+                        <span>Financing Available</span>
+                      </div>
                     </div>
                   </div>
                 </>
@@ -1210,6 +1214,12 @@ function App() {
                     <div className="text-gray-600">
                       <span className="text-3xl font-black text-gray-900 mobile-counter">500+</span> Happy Families
                     </div>
+                  </div>
+                  <div className="flex items-center gap-2 pt-3">
+                    <Badge variant="secondary" className="text-xs font-semibold">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Flexible Financing Options
+                    </Badge>
                   </div>
                 </>
               )}
@@ -1304,8 +1314,12 @@ function App() {
                         <CheckCircle className="h-4 w-4 text-green-600" />
                         <span className="text-xs text-gray-700">Manufacturer warranty</span>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-purple-600" />
+                        <span className="text-xs text-gray-700">Financing available</span>
+                      </div>
                     </div>
-                    <Button 
+                    <Button
                       className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm"
                       onClick={() => handleTabClick('quote')}
                     >
@@ -1404,6 +1418,12 @@ function App() {
                   </div>
                   <Badge className="badge-modern bg-green-100 text-green-800">Most Popular</Badge>
                 </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="outline" className="text-xs">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Financing Available
+                  </Badge>
+                </div>
                 <CardTitle className="text-xl font-bold text-gray-900">
                   Spray Foam Insulation
                 </CardTitle>
@@ -1453,6 +1473,10 @@ function App() {
                   <div className="bg-gradient-to-br from-gray-100 to-gray-200 w-14 h-14 rounded-2xl flex items-center justify-center">
                     <Shield className="h-7 w-7 text-gray-800" />
                   </div>
+                  <Badge variant="outline" className="text-xs">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Easy Payment Plans
+                  </Badge>
                 </div>
                 <CardTitle className="text-xl font-bold text-gray-900">
                   Blown-In Insulation
@@ -1718,8 +1742,21 @@ function App() {
                   <div>
                     <h4 className="text-lg font-semibold mb-1">Quality Guarantee</h4>
                     <p className="text-sm text-gray-600">
-                      We stand behind our work with comprehensive warranties. Your investment is protected 
+                      We stand behind our work with comprehensive warranties. Your investment is protected
                       for as long as you own your home.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="bg-indigo-100 p-2.5 rounded-lg flex-shrink-0">
+                    <CheckCircle className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold mb-1">Easy Financing</h4>
+                    <p className="text-sm text-gray-600">
+                      Flexible payment plans available to make your home improvement affordable.
+                      No need to wait - improve your comfort today.
                     </p>
                   </div>
                 </div>
@@ -1914,7 +1951,7 @@ function App() {
               <CardHeader className="bg-gradient-to-r from-gray-900 to-gray-800 text-white text-center py-8">
                 <CardTitle className="text-2xl lg:text-3xl font-bold">Free In-Home Consultation</CardTitle>
                 <CardDescription className="text-gray-300 text-base mt-2">
-                  Get expert advice at no cost
+                  Get expert advice at no cost • Financing options available
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 lg:p-8 bg-white">
